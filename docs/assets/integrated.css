@@ -1,0 +1,296 @@
+/* A single narrative canvas: evidence lives with the operation it explains. */
+[hidden] {
+  display: none !important;
+}
+.connection-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  gap: 16px;
+  background: transparent;
+}
+#framework-diagram {
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+}
+#connection-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+#connection-steps button {
+  min-width: 0;
+  white-space: normal;
+}
+.problem-inset {
+  margin-top: 26px;
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid #333340;
+  background: transparent;
+  text-align: left;
+  width: 100%;
+  color: var(--muted);
+}
+.problem-inset img {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+}
+.problem-inset span {
+  font-size: 13px;
+}
+.geometry-stage[data-geometry-phase="1"] .cloud-labels,
+.geometry-stage[data-geometry-phase="2"] .cloud-labels,
+.geometry-stage[data-geometry-phase="1"] .neighbor-strip,
+.geometry-stage[data-geometry-phase="2"] .neighbor-strip,
+.geometry-stage[data-geometry-phase="1"] .stage-top,
+.geometry-stage[data-geometry-phase="2"] .stage-top {
+  display: none;
+}
+.results-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+  min-width: 0;
+}
+.evidence-steps {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.evidence-steps button {
+  flex: 1;
+  white-space: nowrap;
+}
+#results-live {
+  width: 100%;
+}
+#results-live .stage-top {
+  margin-bottom: 28px;
+}
+.embedded-evidence {
+  margin: 0;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+.embedded-evidence .evidence-image {
+  border: 0;
+  padding: 0;
+  background: #101014;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: zoom-in;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.embedded-evidence img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 46vh;
+  object-fit: contain;
+}
+#results-evidence img {
+  max-height: 43vh;
+  width: auto;
+  max-width: 100%;
+}
+.embedded-evidence h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+.embedded-evidence p {
+  margin: 6px 0;
+  line-height: 1.65;
+}
+.evidence-caption {
+  color: #d1d0da;
+  font-size: 15px;
+}
+.evidence-scope {
+  color: #a6a5b5;
+  font-size: 12px;
+}
+.evidence-enter {
+  animation: evidenceReveal 0.65s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes evidenceReveal {
+  from {
+    opacity: 0.3;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.experiment-list {
+  gap: 2px;
+}
+.experiment-list button {
+  padding: 9px 12px;
+}
+.experiment-list button small {
+  font-size: 11px;
+}
+.experiment-copy h2 {
+  font-size: clamp(25px, 2.2vw, 34px);
+}
+#experiments-evidence {
+  align-self: center;
+}
+#viewer-image-scroll {
+  background: #101014;
+}
+#viewer-image {
+  background: #101014;
+}
+.viewer-toolbar {
+  background: #15151d;
+}
+#figure-viewer {
+  background: #15151d;
+  color: #ececf4;
+}
+@media (min-width: 1100px) {
+  #slide-connection {
+    grid-template-columns: minmax(240px, 0.64fr) minmax(0, 2fr);
+    gap: 32px;
+  }
+  #slide-connection .chapter-copy h2 {
+    font-size: clamp(25px, 2.4vw, 36px);
+  }
+  #slide-connection .chapter-copy p {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  #slide-connection .connection-stage {
+    height: calc(100svh - var(--header) - var(--footer) - 90px);
+  }
+  #slide-experiments .experiment-layout {
+    grid-template-columns: minmax(260px, 0.65fr) minmax(0, 1.9fr);
+    gap: 42px;
+  }
+}
+@media (max-height: 820px) and (min-width: 1100px) {
+  .experiment-list button {
+    padding: 6px 10px;
+  }
+  .experiment-list small {
+    display: none;
+  }
+  .experiment-copy > p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .experiment-copy .footnote {
+    font-size: 11px;
+  }
+  #slide-connection .connection-stage {
+    height: calc(100svh - var(--header) - var(--footer) - 54px);
+    gap: 8px;
+  }
+  .problem-inset {
+    margin-top: 12px;
+  }
+  .embedded-evidence {
+    gap: 12px;
+  }
+}
+@media (max-width: 800px) {
+  #connection-steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .connection-stage {
+    min-height: 440px;
+  }
+  #framework-diagram {
+    flex: initial;
+  }
+  .problem-inset {
+    display: none;
+  }
+  .embedded-evidence img,
+  #results-evidence img {
+    max-height: none;
+  }
+  .evidence-steps button {
+    padding: 10px;
+    font-size: 12px;
+  }
+  .experiment-list {
+    display: flex;
+    overflow: auto;
+  }
+  .experiment-list button {
+    min-width: 180px;
+  }
+  #experiments-evidence h3 {
+    font-size: 18px;
+  }
+  #results-live .stage-top {
+    margin-bottom: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .evidence-enter {
+    animation: none;
+  }
+}
+#results-evidence img {
+  width: 100%;
+  height: min(39vh, 350px);
+  max-height: none;
+}
+@media (min-width: 801px) {
+  #slide-experiments .experiment-copy > h2 {
+    font-size: 28px;
+    line-height: 1.25;
+    margin-bottom: 14px;
+  }
+  #slide-experiments .experiment-copy > p {
+    font-size: 13px;
+    line-height: 1.65;
+    margin-bottom: 16px;
+  }
+  #slide-experiments .experiment-list {
+    margin: 16px 0;
+    gap: 0;
+  }
+  #slide-experiments .experiment-list button {
+    padding: 11px 10px;
+    min-height: 40px;
+  }
+  #slide-experiments .experiment-list button small {
+    display: none;
+  }
+  #slide-experiments .experiment-list button span {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  #slide-experiments .experiment-copy > .footnote {
+    font-size: 11px;
+    margin: 10px 0 0;
+  }
+}
+@media (max-width: 800px) {
+  #experiments-evidence {
+    order: 3;
+  }
+  #results-evidence img {
+    height: 320px;
+  }
+}

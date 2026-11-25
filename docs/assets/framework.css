@@ -1,0 +1,252 @@
+.native-framework-viewport {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #595168 #17151e;
+}
+.native-framework {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  color: #a99aff;
+  font-family: Manrope, Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+.native-framework .fw-label,
+.native-framework .fw-small,
+.native-framework .fw-chip,
+.native-framework .fw-shape,
+.native-framework .fw-route {
+  font-size: 12px;
+  fill: #d2cedc;
+}
+.native-framework .fw-small {
+  font-size: 11px;
+}
+.native-framework .fw-chip {
+  font-size: 11px;
+  font-weight: 650;
+  fill: #f2edfc;
+}
+.native-framework .fw-route {
+  font-size: 12.5px;
+  font-weight: 650;
+}
+.native-framework .fw-module {
+  font-size: 14px;
+  font-weight: 700;
+  fill: #f0edf5;
+}
+.native-framework .fw-section {
+  font-size: 13px;
+  font-weight: 700;
+  fill: #ded4fb;
+}
+.native-framework .fw-shape {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  fill: #cbc2e5;
+}
+.native-framework .fw-symbol,
+.native-framework .fw-math {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  fill: #eeeaf8;
+}
+.native-framework .fw-math {
+  font-size: 16px;
+}
+.native-framework .fw-symbol {
+  font-size: 21px;
+}
+.native-framework .fw-detail-bg {
+  fill: #191820;
+  stroke: #665971;
+  stroke-width: 1.1;
+  stroke-dasharray: 5 3.5;
+}
+.native-framework .fw-inset {
+  fill: #211e2b;
+  stroke: #7f708f;
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+.native-framework .fw-node,
+.native-framework .fw-grid-face,
+.native-framework .fw-grid-back {
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.native-framework .fw-node.fw-blue {
+  fill: #24313e;
+}
+.native-framework .fw-node.fw-purple {
+  fill: #322a47;
+}
+.native-framework .fw-node.fw-teal {
+  fill: #1e3635;
+}
+.native-framework .fw-grid-back {
+  fill: #26232d;
+  opacity: 0.64;
+}
+.native-framework .fw-grid-lines {
+  stroke: currentColor;
+  stroke-width: 0.55;
+  fill: none;
+  opacity: 0.83;
+}
+.native-framework .fw-blue {
+  color: #8ab9d4;
+}
+.native-framework .fw-purple {
+  color: #ad9bfb;
+}
+.native-framework .fw-teal {
+  color: #7ed2c1;
+}
+.native-framework .fw-cost {
+  fill: #322d2a;
+  stroke: #c3a887;
+  stroke-width: 1.5;
+}
+.native-framework .fw-junction {
+  fill: #22222e;
+  stroke: #c5badb;
+  stroke-width: 1.6;
+}
+.native-framework .fw-scale,
+.native-framework .fw-grid-tag {
+  fill: #282333;
+  stroke: #9788af;
+  stroke-width: 1.2;
+}
+.native-framework .fw-plus {
+  fill: none;
+  stroke: #e7deef;
+  stroke-linecap: round;
+  stroke-width: 1.7;
+}
+.native-framework .fw-wire,
+.native-framework .fw-packet {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.native-framework .fw-wire {
+  stroke-width: 1.55;
+}
+.native-framework .fw-tip {
+  fill: currentColor;
+}
+.native-framework [data-fw-stages] {
+  opacity: 0.83;
+  transition: opacity 0.35s;
+}
+.native-framework [data-fw-stages] [data-fw-stages] {
+  opacity: 1;
+}
+.native-framework [data-fw-stages].fw-active {
+  opacity: 1;
+}
+.native-framework .fw-active > .fw-wire {
+  stroke-width: 2;
+}
+.native-framework .fw-active > .fw-node,
+.native-framework .fw-active > .fw-grid > .fw-grid-face {
+  stroke-width: 2.3;
+}
+.native-framework .fw-active > .fw-inset {
+  stroke: #bcaae9;
+  stroke-width: 1.55;
+}
+.native-framework .fw-active > .fw-node.fw-purple {
+  fill: #443957;
+}
+.native-framework .fw-active > .fw-node.fw-teal {
+  fill: #24433e;
+}
+.native-framework .fw-active > .fw-node.fw-blue {
+  fill: #2b3b48;
+}
+.native-framework .fw-packet {
+  display: none;
+  pointer-events: none;
+  stroke-width: 3.5;
+  stroke-dasharray: 10 90;
+}
+.native-framework .fw-active > .fw-packet {
+  display: inline;
+  stroke: #ece5ff;
+  animation: fw-flow 2.1s linear infinite;
+}
+.native-framework .fw-active > .fw-packet.fw-teal {
+  stroke: #caffed;
+}
+.native-framework .fw-active > .fw-packet.fw-blue {
+  stroke: #cef0ff;
+}
+.native-framework .fw-scan {
+  display: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 4;
+}
+.native-framework .fw-active > .fw-grid .fw-scan {
+  display: inline;
+  animation: fw-scan 2.8s ease-in-out infinite;
+}
+.native-framework.fw-paused .fw-packet,
+.native-framework.fw-paused .fw-scan {
+  animation-play-state: paused;
+}
+@keyframes fw-scan {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.55;
+  }
+  72%,
+  94% {
+    transform: translateX(var(--fw-scan-width));
+    opacity: 0;
+  }
+}
+@keyframes fw-flow {
+  from {
+    stroke-dashoffset: 10;
+  }
+  to {
+    stroke-dashoffset: -90;
+  }
+}
+@media (max-width: 650px) {
+  .native-framework-viewport {
+    max-height: clamp(220px, 33svh, 295px);
+    overflow: auto;
+  }
+  .native-framework-viewport .native-framework {
+    width: 800px;
+    min-width: 800px;
+    height: 429px;
+    max-height: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .native-framework [data-fw-stages] {
+    transition: none;
+  }
+  .native-framework .fw-active > .fw-packet,
+  .native-framework .fw-active > .fw-grid .fw-scan {
+    display: none;
+    animation: none;
+  }
+}

@@ -2,12 +2,10 @@ const $ = (s) => document.querySelector(s);
 const pages = [
   { id: "overview", label: "Overview", duration: 14000 },
   { id: "geometry", label: "Shared geometry", duration: 42000 },
-  { id: "connection", label: "Framework", duration: 30000 },
+  { id: "connection", label: "Framework", duration: 32000 },
   { id: "interface", label: "Interface", duration: 24000 },
-  { id: "results", label: "Results", duration: 28000 },
-  { id: "experiments", label: "Experiments", duration: 57000 },
-  { id: "figures", label: "Paper figures", duration: 64000 },
-  { id: "paper", label: "Paper", duration: 14000 },
+  { id: "results", label: "Results", duration: 48000 },
+  { id: "experiments", label: "Experiments", duration: 87000 },
 ];
 const offsets = pages.map((_, i) =>
   pages.slice(0, i).reduce((s, p) => s + p.duration, 0),
@@ -100,11 +98,7 @@ export function initDeck(api) {
   function sync(force = false) {
     const id = pages[page].id;
     if (id === "connection") {
-      const step = Math.min(
-        3,
-        Math.max(0, Math.floor((elapsed - 10000) / 5000)),
-      );
-      api.paperViews.setFramework(elapsed < 10000 ? "paper" : "walkthrough");
+      const step = Math.min(3, Math.floor(elapsed / 8000));
       if (cue !== `connection-${step}` || force) {
         api.connection.setStep(step);
         cue = `connection-${step}`;
@@ -116,12 +110,18 @@ export function initDeck(api) {
         cue = `interface-${step}`;
       }
     } else if (id === "results") {
-      const study = ["navigation", "spatial", "second_source", "brightness"][
-        Math.min(3, Math.floor(elapsed / 7000))
-      ];
-      if (cue !== study || force) {
-        api.setStudy(study);
-        cue = study;
+      const name =
+        elapsed < 28000
+          ? ["navigation", "spatial", "second_source", "brightness"][
+              Math.min(3, Math.floor(elapsed / 7000))
+            ]
+          : elapsed < 38000
+            ? "prediction-controls"
+            : "learned-source";
+      if (cue !== name || force) {
+        if (elapsed < 28000) api.setStudy(name);
+        else api.paperViews.setResultView(name);
+        cue = name;
       }
     } else if (id === "geometry") {
       const step = elapsed < 12000 ? 0 : elapsed < 28000 ? 1 : 2;
@@ -136,24 +136,25 @@ export function initDeck(api) {
         }
         cue = `geometry-${step}-${index}`;
       }
-    } else if (id === "figures") {
-      const ids = [
-        "problem",
-        "framework",
-        "shared-geometry",
-        "prediction-controls",
-        "learned-source",
-        "matched-executions",
-        "manipulation-predictions",
-        "driving-context",
-      ];
-      const index = Math.min(7, Math.floor(elapsed / 8000));
-      if (cue !== ids[index] || force) {
-        api.paperViews.selectFigure(ids[index]);
-        cue = ids[index];
+    } else if (id === "experiments") {
+      if (elapsed < 57000) {
+        api.paperViews.showExperimentVideo();
+        mediaAtTime(force);
+      } else {
+        v.pause();
+        const id = [
+          "matched-executions",
+          "manipulation-predictions",
+          "driving-context",
+        ][Math.min(2, Math.floor((elapsed - 57000) / 10000))];
+        if (cue !== id || force) {
+          api.paperViews.selectExperimentFigure(id);
+          cue = id;
+        }
       }
-    } else if (id === "experiments") mediaAtTime(force);
+    }
   }
+
   function change(index, local = 0, historyMode = "replace") {
     page = Math.max(0, Math.min(pages.length - 1, index));
     elapsed = Math.max(0, Math.min(pages[page].duration, local));
@@ -190,6 +191,8 @@ export function initDeck(api) {
       window.geometryView?.resumeExploration();
     else window.geometryView?.pauseExploration();
     sync(true);
+    if (pages[page].id === "connection" && !explicitPause)
+      api.connection.resume();
     updateControls();
     last = performance.now();
   }
@@ -199,7 +202,8 @@ export function initDeck(api) {
     const dt = Math.min(120, now - last);
     last = now;
     // Pause the presentation clock while a requested recorded clip buffers.
-    const buffering = pages[page].id === "experiments" && v.readyState < 2;
+    const buffering =
+      pages[page].id === "experiments" && elapsed < 57000 && v.readyState < 2;
     if (!buffering) elapsed += dt;
     if (elapsed >= pages[page].duration) {
       if (page === pages.length - 1) {
@@ -222,6 +226,8 @@ export function initDeck(api) {
     if (pages[page].id === "overview") window.geometryView?.resumeHero();
     if (pages[page].id === "geometry") window.geometryView?.resumeExploration();
     sync(true);
+    if (pages[page].id === "connection" && !explicitPause)
+      api.connection.resume();
     updateControls();
     last = performance.now();
     raf = requestAnimationFrame(tick);
@@ -231,6 +237,7 @@ export function initDeck(api) {
     change(index, 0, "push");
     explicitPause = false;
     if (page === 0) window.geometryView?.resumeHero();
+    if (pages[page].id === "connection") api.connection.resume();
     if (pages[page].id === "geometry") window.geometryView?.resumeExploration();
   }
   $("#autoplay").onclick = () => (playing ? pause() : play());
@@ -246,8 +253,6 @@ export function initDeck(api) {
       (b.onclick = () => {
         const id = b.dataset.page || b.dataset.go;
         go(pages.findIndex((p) => p.id === id));
-        if (b.dataset.galleryTarget)
-          api.paperViews.selectFigure(b.dataset.galleryTarget);
       }),
   );
   $("#tour-seek").addEventListener("input", (e) => {
@@ -281,26 +286,27 @@ export function initDeck(api) {
   $("#stage").addEventListener("click", (e) => {
     if (!e.isTrusted) return;
     const b = e.target.closest(
-      "[data-step],[data-stage],[data-case],[data-geometry-step],[data-framework-mode],[data-paper-figure]",
+      "[data-step],[data-stage],[data-case],[data-geometry-step],[data-result-view],[data-experiment-figure]",
     );
     if (!b) return;
-    if (b.dataset.step !== undefined) elapsed = 10000 + +b.dataset.step * 5000;
+    if (b.dataset.step !== undefined) elapsed = +b.dataset.step * 8000;
     if (b.dataset.geometryStep !== undefined)
       elapsed = [0, 12000, 28000][+b.dataset.geometryStep];
-    if (b.dataset.frameworkMode !== undefined)
-      elapsed = b.dataset.frameworkMode === "paper" ? 0 : 10000;
-    if (b.dataset.paperFigure !== undefined)
+    if (b.dataset.resultView !== undefined)
+      elapsed = {
+        cohorts: 0,
+        "prediction-controls": 28000,
+        "learned-source": 38000,
+      }[b.dataset.resultView];
+    if (b.dataset.experimentFigure !== undefined)
       elapsed =
+        57000 +
         [
-          "problem",
-          "framework",
-          "shared-geometry",
-          "prediction-controls",
-          "learned-source",
           "matched-executions",
           "manipulation-predictions",
           "driving-context",
-        ].indexOf(b.dataset.paperFigure) * 8000;
+        ].indexOf(b.dataset.experimentFigure) *
+          10000;
     if (b.dataset.stage !== undefined) elapsed = +b.dataset.stage * 6000;
     if (b.dataset.case !== undefined) elapsed = cases[+b.dataset.case].start;
     cue = "";

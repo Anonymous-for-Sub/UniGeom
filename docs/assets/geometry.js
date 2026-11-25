@@ -23,7 +23,21 @@ export class GeometryView {
     this.normalized = new WeakMap();
     this.heroVisible = true;
     this.explorerVisible = false;
-    this.explorationStep = 1;
+    this.explorationStep = 0;
+    this.explorerTime = 0;
+    this.enteredAt = -10;
+    this.hover = null;
+    this.bin = null;
+    this.chartRows = [];
+    // Each bin retains its real observation IDs, in the order they were measured.
+    this.histograms = data.pairs.map((pair) => {
+      const bins = Array.from({ length: 11 }, () => []);
+      pair.shared.forEach((count, id) => bins[count].push(id));
+      return bins;
+    });
+    this.chartMax =
+      Math.ceil(Math.max(...this.histograms.flat().map((b) => b.length)) / 25) *
+      25;
     this.heroPaused = false;
     this.explorerPaused = false;
     this.frame = null;
@@ -59,56 +73,68 @@ export class GeometryView {
       else if (!this.heroVisible) this.stopHero();
     }).observe(this.canvas);
     this.canvas.addEventListener("pointerdown", (e) => {
-      this.drag = {
-        x: e.clientX,
-        y: e.clientY,
-        startX: e.clientX,
-        startY: e.clientY,
-      };
-      this.canvas.setPointerCapture(e.pointerId);
+      if (this.explorationStep === 0) {
+        this.drag = {
+          x: e.clientX,
+          y: e.clientY,
+          startX: e.clientX,
+          startY: e.clientY,
+        };
+        this.canvas.setPointerCapture(e.pointerId);
+      }
     });
     this.canvas.addEventListener("pointermove", (e) => {
-      if (!this.drag) return;
-      this.yaw += (e.clientX - this.drag.x) * 0.008;
-      this.pitch = Math.max(
-        -1.2,
-        Math.min(1.2, this.pitch + (e.clientY - this.drag.y) * 0.008),
-      );
-      this.drag.x = e.clientX;
-      this.drag.y = e.clientY;
-      this.render();
+      if (this.drag) {
+        this.yaw += (e.clientX - this.drag.x) * 0.008;
+        this.pitch = Math.max(
+          -1.2,
+          Math.min(1.2, this.pitch + (e.clientY - this.drag.y) * 0.008),
+        );
+        this.drag.x = e.clientX;
+        this.drag.y = e.clientY;
+        this.hover = null;
+      } else {
+        this.hover = this.hitTest(e);
+        if (this.explorationStep === 2 && this.hover) this.enteredAt = -10;
+      }
+      this.render(false);
+    });
+    this.canvas.addEventListener("pointerleave", () => {
+      this.hover = null;
+      this.render(false);
     });
     this.canvas.addEventListener("pointerup", (e) => {
-      if (!this.drag) return;
-      const moved = Math.hypot(
-        e.clientX - this.drag.startX,
-        e.clientY - this.drag.startY,
-      );
+      const moved =
+        this.drag &&
+        Math.hypot(e.clientX - this.drag.startX, e.clientY - this.drag.startY) >
+          5;
       this.drag = null;
-      if (moved > 5) return;
-      const r = this.canvas.getBoundingClientRect(),
-        x = e.clientX - r.left,
-        y = e.clientY - r.top;
-      let best = null,
-        dist = 18;
-      for (const p of this.points) {
-        const d = Math.hypot(p.x - x, p.y - y);
-        if (d < dist) {
-          dist = d;
-          best = p;
-        }
-      }
-      if (best) this.select(best.id);
+      if (moved) return;
+      const target = this.hitTest(e);
+      if (!target) return;
+      if (this.explorationStep === 2) this.inspectBin(target);
+      else this.select(target.id);
     });
-    this.canvas.addEventListener("pointercancel", () => (this.drag = null));
+    this.canvas.addEventListener("pointercancel", () => {
+      this.drag = null;
+      this.hover = null;
+    });
     this.canvas.addEventListener("keydown", (e) => {
-      if (["ArrowLeft", "ArrowRight"].includes(e.key)) {
-        e.preventDefault();
-        this.select(this.query + (e.key === "ArrowRight" ? 1 : -1));
-      }
+      if (!["ArrowLeft", "ArrowRight"].includes(e.key)) return;
+      e.preventDefault();
+      const direction = e.key === "ArrowRight" ? 1 : -1;
+      if (this.explorationStep === 2) {
+        const current =
+          this.bin?.index ?? this.data.pairs[this.pair].shared[this.query];
+        this.inspectBin({
+          pair: this.pair,
+          index: (current + direction + 11) % 11,
+        });
+      } else this.select(this.query + direction);
     });
     document.querySelector("#geometry-pair").addEventListener("change", (e) => {
       this.pair = +e.target.value;
+      this.bin = null;
       this.select(this.data.pairs[this.pair].example);
     });
     document.querySelector("#next-query").onclick = () =>
@@ -129,6 +155,9 @@ export class GeometryView {
     el.style.backgroundPosition = `${-(index % 32) * size}px ${-Math.floor(index / 32) * size}px`;
   }
   select(index) {
+    if (this.explorationStep === 1 && !this.reduced && !this.explorerPaused)
+      this.enteredAt = this.explorerTime;
+    this.hover = null;
     this.query =
       (index + this.data.episodes.length) % this.data.episodes.length;
     const p = this.data.pairs[this.pair];
@@ -205,12 +234,77 @@ export class GeometryView {
     ctx.fill();
   }
   setExplorationStep(step) {
-    this.explorationStep = Math.max(
-      0,
-      Math.min(2, Math.trunc(Number(step) || 0)),
+    const next = Math.max(0, Math.min(2, Math.trunc(Number(step) || 0)));
+    if (next !== this.explorationStep) {
+      if (!this.reduced && !this.explorerPaused && this.canvas.clientWidth) {
+        this.previousFrame = document.createElement("canvas");
+        this.previousFrame.width = this.canvas.width;
+        this.previousFrame.height = this.canvas.height;
+        this.previousFrame.getContext("2d").drawImage(this.canvas, 0, 0);
+      } else this.previousFrame = null;
+      this.enteredAt =
+        this.reduced || this.explorerPaused ? -10 : this.explorerTime;
+      this.explorationStep = next;
+      this.hover = this.drag = this.bin = null;
+    }
+    this.canvas.dataset.explorationStep = String(next);
+    this.canvas.setAttribute(
+      "aria-label",
+      [
+        "Two 3D projections of the same observations. Drag to rotate or select an observation.",
+        "Two ordered lists of the ten nearest neighbors. Lines join matching observation IDs. Select a neighbor or use the arrow keys to change the query.",
+        "Overlap distributions for three model pairs. Each histogram counts all 606 observations by how many of their ten neighbors agree. Select a bar or use the arrow keys to inspect its count.",
+      ][next],
     );
-    this.canvas.dataset.explorationStep = String(this.explorationStep);
+    this.canvas.style.cursor = next === 0 ? "grab" : "default";
     this.render();
+    this.startHero();
+  }
+  hitTest(event) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left,
+      y = event.clientY - rect.top;
+    if (this.explorationStep === 2) {
+      const row = this.chartRows.find((r) => y >= r.top && y < r.bottom);
+      if (!row || x < row.x || x >= row.x + row.width) return null;
+      return {
+        pair: row.pair,
+        index: Math.floor(((x - row.x) * 11) / row.width),
+      };
+    }
+    let best = null,
+      distance = 13;
+    for (const point of this.points) {
+      if (
+        point.left !== undefined &&
+        x >= point.left &&
+        x <= point.right &&
+        Math.abs(y - point.y) < point.h / 2
+      )
+        return point;
+      const d = Math.hypot(point.x - x, point.y - y);
+      if (d < distance) {
+        best = point;
+        distance = d;
+      }
+    }
+    return best;
+  }
+  inspectBin(target) {
+    if (target.pair !== this.pair) {
+      const select = document.querySelector("#geometry-pair");
+      select.value = String(target.pair);
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    this.bin = target;
+    this.hover = null;
+    this.enteredAt = -10;
+    const count = this.histograms[target.pair][target.index].length;
+    this.canvas.setAttribute(
+      "aria-label",
+      `Pair ${target.pair + 1}, ${target.index} shared neighbors, ${count} of 606 observations. Use the arrow keys to inspect other bins.`,
+    );
+    this.render(false);
   }
   // Orthographic projection and a uniform display scale retain the geometry.
   // Fit the full projected bounds, including outliers, inside each viewport.
@@ -257,103 +351,339 @@ export class GeometryView {
     ctx.lineWidth = 1.5;
     ctx.stroke();
   }
+  label(ctx, text, x, y, size, color, align = "left", weight = 500) {
+    ctx.font = `${weight} ${size}px Manrope, Arial, sans-serif`;
+    ctx.textAlign = align;
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, y);
+  }
   render(refreshSprites = true) {
     const setup = this.setup(this.canvas);
     if (!setup) return;
-    const { ctx, w, h } = setup,
-      p = this.data.pairs[this.pair];
+    const { ctx, w, h } = setup;
     this.points = [];
-    const shared = new Set(
-      p.neighborsA[this.query].filter((id) =>
-        p.neighborsB[this.query].includes(id),
-      ),
-    );
-    const reveal = this.explorationStep > 0;
-    const pulse = this.reduced ? 0.5 : (1 + Math.sin(this.phase * 5)) / 2;
-    const positions = ["a", "b"].map((side, j) =>
-      this.fitCloud(this.normalize(p[side]), {
-        x: w * (j ? 0.755 : 0.245),
-        y: h * 0.5,
-        w: Math.max(20, w * 0.45 - 18),
-        h: Math.max(20, h - 54),
-      }),
-    );
-    positions.forEach((pts, j) => {
+    this.chartRows = [];
+    const elapsed = this.reduced ? 10 : this.explorerTime - this.enteredAt;
+    if (this.explorationStep === 0) this.drawSpaces(ctx, w, h);
+    if (this.explorationStep === 1) this.drawRanks(ctx, w, h, elapsed);
+    if (this.explorationStep === 2) this.drawDistributions(ctx, w, h, elapsed);
+    if (this.previousFrame && elapsed < 0.36) {
+      ctx.globalAlpha = (1 - elapsed / 0.36) ** 2;
+      ctx.drawImage(this.previousFrame, 0, 0, w, h);
+      ctx.globalAlpha = 1;
+    } else this.previousFrame = null;
+    this.canvas.style.cursor = this.hover
+      ? "pointer"
+      : this.explorationStep === 0
+        ? "grab"
+        : "default";
+    if (refreshSprites) {
+      const ids = this.data.pairs[this.pair].neighborsA[this.query];
+      document
+        .querySelectorAll("#neighbor-strip button")
+        .forEach((el, i) => this.sprite(el, ids[i]));
+    }
+  }
+  drawSpaces(ctx, w, h) {
+    const pair = this.data.pairs[this.pair];
+    ["a", "b"].forEach((side, j) => {
       const base = j ? colors.teal : colors.purple;
-      const ids = j ? p.neighborsB[this.query] : p.neighborsA[this.query];
-      const query = pts[this.query];
+      const cx = w * (j ? 0.755 : 0.245),
+        cy = h * 0.5;
+      const pts = this.fitCloud(this.normalize(pair[side]), {
+        x: cx,
+        y: cy,
+        w: Math.max(20, w * 0.46 - 12),
+        h: Math.max(20, h - 48),
+      });
       this.points.push(...pts);
-      this.glow(
-        ctx,
-        w * (j ? 0.755 : 0.245),
-        h * 0.5,
-        Math.min(w * 0.3, h * 0.6),
-        base,
-      );
+      this.glow(ctx, cx, cy, Math.min(w * 0.3, h * 0.6), base);
       pts
         .slice()
         .sort((a, b) => a.z - b.z)
-        .forEach((q) => {
-          const depth = Math.max(0, Math.min(1, (q.z + 1) / 2));
-          ctx.globalAlpha = (reveal ? 0.4 : 0.62) + depth * 0.28;
-          this.dot(ctx, q, (w < 500 ? 1.9 : 2.4) + depth * 1.05, base);
+        .forEach((point) => {
+          const depth = Math.max(0, Math.min(1, (point.z + 1) / 2));
+          ctx.globalAlpha = 0.53 + depth * 0.4;
+          this.dot(ctx, point, (w < 500 ? 1.5 : 2) + depth * 1.2, base);
         });
       ctx.globalAlpha = 1;
-      if (reveal) {
-        ids.forEach((id, i) => {
-          const color = shared.has(id)
-            ? colors.purple
-            : j
-              ? colors.teal
-              : colors.sand;
-          const target = pts[id];
-          ctx.strokeStyle = color;
-          ctx.globalAlpha = shared.has(id) ? 0.72 : 0.45;
-          ctx.lineWidth = shared.has(id) ? 1.8 : 1.2;
-          ctx.beginPath();
-          ctx.moveTo(query.x, query.y);
-          ctx.lineTo(target.x, target.y);
-          ctx.stroke();
-          ctx.globalAlpha = 1;
-          // A light travels along an existing measured neighbor link only.
-          if (!this.reduced && shared.has(id)) {
-            const t = (this.phase * 0.7 + i / ids.length) % 1;
-            this.dot(
-              ctx,
-              {
-                x: query.x + (target.x - query.x) * t,
-                y: query.y + (target.y - query.y) * t,
-              },
-              2,
-              "#eeebff",
-            );
-          }
-        });
-        ids.forEach((id) => {
-          const color = shared.has(id)
-            ? colors.purple
-            : j
-              ? colors.teal
-              : colors.sand;
-          const point = pts[id];
-          if (shared.has(id)) {
-            ctx.globalAlpha = 0.15 + pulse * 0.12;
-            this.dot(ctx, point, 10 + pulse * 2, color);
-            ctx.globalAlpha = 1;
-          }
-          this.dot(ctx, point, w < 500 ? 5 : 6.2, color, !shared.has(id));
-          ctx.strokeStyle = "#f4f0ff";
-          ctx.lineWidth = shared.has(id) ? 1.2 : 0.6;
-          ctx.stroke();
-        });
+      this.queryMarker(ctx, pts[this.query], colors.ink, w < 500 ? 8 : 11);
+      if (this.hover) {
+        const point = pts[this.hover.id];
+        this.queryMarker(ctx, point, base, 7);
+        const text = `#${this.data.episodes[point.id]}`;
+        const x = Math.min(w - 63, Math.max(2, point.x - 28));
+        const y = Math.max(1, point.y - 32);
+        ctx.fillStyle = "#1e1d2a";
+        ctx.fillRect(x, y, 61, 20);
+        this.label(ctx, text, x + 30, y + 10, 11, colors.ink, "center");
       }
-      this.queryMarker(ctx, query, colors.ink, w < 500 ? 10 : 13);
     });
-    if (refreshSprites) {
-      document
-        .querySelectorAll("#neighbor-strip button")
-        .forEach((el, i) => this.sprite(el, p.neighborsA[this.query][i]));
+  }
+  drawRanks(ctx, w, h, elapsed) {
+    const pair = this.data.pairs[this.pair];
+    const lists = [pair.neighborsA[this.query], pair.neighborsB[this.query]];
+    const compact = w < 460;
+    const rowHeight = Math.min(34, (h - 57) / 10);
+    const top = (h - rowHeight * 10 - 48) / 2;
+    const left = Math.max(10, w * 0.065),
+      right = w - left;
+    const pins = [w * 0.36, w * 0.64];
+    const shared = new Set(lists[0].filter((id) => lists[1].includes(id)));
+    const font = Math.min(compact ? 12 : 15, Math.max(10, rowHeight * 0.63));
+    const rowY = (rank) => top + 48 + (rank + 0.5) * rowHeight;
+    this.label(
+      ctx,
+      `Query #${this.data.episodes[this.query]}   ·   ${shared.size} / 10 shared`,
+      w / 2,
+      top + 9,
+      compact ? 13 : 15,
+      colors.ink,
+      "center",
+      700,
+    );
+    this.label(
+      ctx,
+      "Encoder A",
+      left,
+      top + 35,
+      font,
+      colors.deep,
+      "left",
+      700,
+    );
+    this.label(
+      ctx,
+      "Encoder B",
+      right,
+      top + 35,
+      font,
+      colors.teal,
+      "right",
+      700,
+    );
+    // Rank determines row position; each bridge joins exactly the same observation.
+    // The original 192D neighbor order comes directly from the exported lists.
+    const mid = w / 2;
+    for (const id of shared) {
+      const a = lists[0].indexOf(id),
+        b = lists[1].indexOf(id);
+      const y0 = rowY(a),
+        y1 = rowY(b);
+      const muted = this.hover && this.hover.id !== id;
+      const selected = this.hover?.id === id;
+      const t = Math.min(1, Math.max(0, (elapsed - a * 0.048) / 0.75));
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(pins[0] - 2, 0, (pins[1] - pins[0] + 4) * t, h);
+      ctx.clip();
+      ctx.strokeStyle = muted
+        ? "#8278ae42"
+        : selected
+          ? "#f1eaff"
+          : "#aba0f5ae";
+      ctx.lineWidth = selected ? 2.9 : compact ? 1.5 : 2;
+      ctx.beginPath();
+      ctx.moveTo(pins[0], y0);
+      ctx.bezierCurveTo(mid, y0, mid, y1, pins[1], y1);
+      ctx.stroke();
+      if (!this.reduced && !muted) {
+        const u = (this.explorerTime * 0.36 + a * 0.081) % 1;
+        const v = 1 - u;
+        this.dot(
+          ctx,
+          {
+            x: v ** 3 * pins[0] + 3 * v * u * mid + u ** 3 * pins[1],
+            y: (v ** 3 + 3 * v ** 2 * u) * y0 + (3 * v * u ** 2 + u ** 3) * y1,
+          },
+          compact ? 1.8 : 2.2,
+          "#f0ebff",
+        );
+      }
+      ctx.restore();
     }
+    lists.forEach((ids, side) => {
+      ids.forEach((id, rank) => {
+        const y = rowY(rank);
+        const x = pins[side];
+        const isShared = shared.has(id);
+        const color = isShared
+          ? colors.purple
+          : side
+            ? colors.teal
+            : colors.sand;
+        const minX = side ? x : left,
+          maxX = side ? right : x;
+        const point = {
+          x,
+          y,
+          id,
+          left: minX - 7,
+          right: maxX + 7,
+          h: rowHeight,
+        };
+        this.points.push(point);
+        const selected = this.hover?.id === id;
+        ctx.fillStyle = selected
+          ? "#9789ef40"
+          : isShared
+            ? "#a29cff10"
+            : "#acb1c00a";
+        ctx.fillRect(
+          minX - 5,
+          y - rowHeight * 0.42,
+          maxX - minX + 10,
+          rowHeight * 0.84,
+        );
+        const position = side ? right : left;
+        this.label(
+          ctx,
+          String(rank + 1).padStart(2, "0"),
+          position,
+          y,
+          font - 1,
+          "#b8b2c9",
+          side ? "right" : "left",
+        );
+        const align = side ? "right" : "left";
+        this.label(
+          ctx,
+          `#${this.data.episodes[id]}`,
+          position + (side ? -1 : 1) * (compact ? 18 : 30),
+          y,
+          font,
+          selected ? "#fff" : colors.ink,
+          align,
+          selected ? 750 : 550,
+        );
+        this.dot(ctx, point, Math.min(4.6, rowHeight * 0.2), color, !isShared);
+      });
+    });
+  }
+  drawDistributions(ctx, w, h, elapsed) {
+    const compact = w < 470;
+    const pad = compact ? 6 : Math.max(16, w * 0.025);
+    const x = pad + (compact ? 65 : 91);
+    const width = w - x - pad - (compact ? 22 : 27);
+    const slot = width / 11;
+    const top = 30;
+    const bottom = h - 41;
+    const rowHeight = (bottom - top) / this.histograms.length;
+    const n = this.data.episodes.length;
+    const fraction = Math.min(1, Math.max(0, elapsed / 1.65));
+    const included = Math.round(n * (1 - (1 - fraction) ** 2));
+    const active = this.hover ?? this.bin;
+    const heading = active
+      ? `Pair ${active.pair + 1}  ·  ${active.index} shared  ·  ${this.histograms[active.pair][active.index].length} observations`
+      : `${included === n ? n : `${included} / ${n}`} observations per pair`;
+    this.label(
+      ctx,
+      heading,
+      pad + 2,
+      13,
+      compact ? 11 : 14,
+      colors.ink,
+      "left",
+      650,
+    );
+    this.histograms.forEach((bins, pair) => {
+      const selected = pair === this.pair;
+      const y = top + pair * rowHeight;
+      const baseline = y + rowHeight - 4;
+      const plotHeight = rowHeight - 14;
+      this.chartRows.push({ pair, x, width, top: y, bottom: y + rowHeight });
+      ctx.fillStyle = selected ? "#a29cff0f" : "#a29cff05";
+      ctx.fillRect(pad, y + 1, w - 2 * pad, rowHeight - 2);
+      ctx.fillStyle = selected ? colors.purple : "#575367";
+      ctx.fillRect(pad, y + 4, selected ? 3 : 1, rowHeight - 8);
+      this.label(
+        ctx,
+        this.data.pairs[pair].name,
+        pad + 8,
+        y + rowHeight * 0.37,
+        compact ? 11 : 14,
+        colors.ink,
+        "left",
+        650,
+      );
+      this.label(
+        ctx,
+        `${(this.data.pairs[pair].mean * 100).toFixed(1)}% mean`,
+        pad + 8,
+        y + rowHeight * 0.65,
+        compact ? 10 : 12,
+        selected ? colors.deep : colors.teal,
+      );
+      // Identical count scales allow direct comparisons between all three pairs.
+      [50, 100, 150].forEach((value) => {
+        const gridY = baseline - (value * plotHeight) / this.chartMax;
+        ctx.fillStyle = "#454152";
+        ctx.fillRect(x, gridY, width, 0.6);
+        if (plotHeight > 70 || value === 100)
+          this.label(
+            ctx,
+            String(value),
+            x + width + 3,
+            gridY,
+            compact ? 9 : 10,
+            "#b3adc1",
+          );
+      });
+      ctx.fillStyle = "#77738a";
+      ctx.fillRect(x, baseline, width, 1);
+      bins.forEach((ids, index) => {
+        let count = ids.length;
+        // The entry animation accumulates actual observations in dataset order.
+        if (included < n) count = ids.filter((id) => id < included).length;
+        const height = (count * plotHeight) / this.chartMax;
+        const highlight = active?.pair === pair && active.index === index;
+        const barWidth = Math.min(48, slot * 0.69);
+        const barX = x + (index + 0.5) * slot - barWidth / 2;
+        ctx.fillStyle = highlight
+          ? "#f3edff"
+          : selected
+            ? colors.purple
+            : colors.teal;
+        ctx.fillRect(barX, baseline - height, barWidth, height);
+        if (
+          !compact &&
+          plotHeight > 43 &&
+          (highlight ||
+            (included === n &&
+              count === Math.max(...bins.map((b) => b.length))))
+        ) {
+          this.label(
+            ctx,
+            String(count),
+            barX + barWidth / 2,
+            baseline - height - 7,
+            11,
+            colors.ink,
+            "center",
+          );
+        }
+      });
+    });
+    for (let i = 0; i <= 10; i++)
+      this.label(
+        ctx,
+        String(i),
+        x + (i + 0.5) * slot,
+        bottom + 10,
+        compact ? 10 : 12,
+        colors.ink,
+        "center",
+      );
+    this.label(
+      ctx,
+      "Shared neighbors out of 10",
+      x + width / 2,
+      bottom + 29,
+      compact ? 11 : 13,
+      "#ccc7df",
+      "center",
+    );
   }
   drawHero() {
     const setup = this.setup(this.hero);
@@ -504,16 +834,29 @@ export class GeometryView {
       if (this.explorerVisible && !this.explorerPaused) this.render(false);
     };
     draw();
-    if (this.reduced) return;
+    const animating = () =>
+      !this.reduced &&
+      ((this.heroVisible && !this.heroPaused) ||
+        (this.explorerVisible &&
+          !this.explorerPaused &&
+          (this.explorationStep !== 2 ||
+            this.explorerTime - this.enteredAt < 1.7)));
+    if (!animating()) return;
     this.lastHeroFrame = null;
     const tick = (time) => {
       this.frame = null;
-      if (!active() || this.reduced) return;
+      if (!active() || !animating()) return;
       if (this.lastHeroFrame === null) this.lastHeroFrame = time;
       const elapsed = time - this.lastHeroFrame;
       // Thirty drawn frames per second is sufficient for the slow camera drift.
       if (elapsed >= 1000 / 30) {
-        this.phase += Math.min(elapsed, 100) * 0.00011;
+        const seconds = Math.min(elapsed, 100) / 1000;
+        if (this.heroVisible && !this.heroPaused) this.phase += seconds * 0.11;
+        if (this.explorerVisible && !this.explorerPaused) {
+          this.explorerTime += seconds;
+          if (this.explorationStep === 0 && !this.drag && !this.hover)
+            this.yaw += seconds * 0.14;
+        }
         this.lastHeroFrame = time;
         draw();
       }

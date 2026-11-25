@@ -1,5 +1,6 @@
-import { GeometryView } from "./geometry.js?v=20261126b";
-import { initConnection, initInterface } from "./diagrams.js?v=20261126b";
+import { initFramework, frameworkSteps } from "./framework.js?v=20261126c";
+import { GeometryView } from "./geometry.js?v=20261126c";
+import { initInterface } from "./diagrams.js?v=20261126c";
 const $ = (s) => document.querySelector(s);
 
 function tabKeys(container, selector) {
@@ -34,7 +35,24 @@ function tabKeys(container, selector) {
 }
 
 tabKeys($(".experiment-list"), "button");
-const connection = initConnection();
+const connection = initFramework($("#framework-diagram"), {
+  onStep(index) {
+    $("#connection-detail").textContent = frameworkSteps[index].description;
+    document.querySelectorAll("#connection-steps button").forEach((b, i) => {
+      b.classList.toggle("selected", i === index);
+      b.setAttribute("aria-pressed", i === index);
+    });
+  },
+});
+window.frameworkView = connection;
+document.querySelectorAll("#connection-steps button").forEach(
+  (b) =>
+    (b.onclick = () => {
+      connection.setStep(+b.dataset.step);
+      connection.resume();
+    }),
+);
+$("#play-connection").onclick = () => connection.replay();
 const spatialInterface = initInterface();
 fetch("assets/data/geometry.json")
   .then((r) => {
@@ -226,6 +244,7 @@ const cases = [
 ];
 let activeCase = -1;
 function showCase(i) {
+  window.paperViews?.showExperimentVideo();
   activeCase = i;
   const c = cases[i],
     v = $("#case-video");
@@ -258,24 +277,8 @@ new IntersectionObserver(
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) $("#case-video").pause();
 });
-$("#copy-citation").onclick = async () => {
-  const content = $("#bibtex").textContent;
-  try {
-    await navigator.clipboard.writeText(content);
-    $("#copy-status").textContent = "Citation copied.";
-  } catch {
-    const range = document.createRange();
-    range.selectNodeContents($("#bibtex"));
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-    $("#copy-status").textContent =
-      "Citation selected. Press Ctrl+C or ⌘C to copy.";
-  }
-};
-
-import { initDeck } from "./deck.js?v=20261126b";
-import { initPaperViews } from "./paper-views.js?v=20261126b";
+import { initDeck } from "./deck.js?v=20261126c";
+import { initPaperViews } from "./paper-views.js?v=20261126c";
 const paperViews = initPaperViews();
 window.paperViews = paperViews;
 initDeck({
@@ -286,6 +289,7 @@ initDeck({
   getActiveCase: () => activeCase,
   setStudy(name) {
     $("#results-study").value = name;
+    paperViews.setResultView("cohorts");
     renderResults();
   },
 });

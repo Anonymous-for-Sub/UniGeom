@@ -1,30 +1,32 @@
 # UniGeom project page
 
-The project page is a static site served from `docs/` on the `main` branch through GitHub Pages. Open `index.html` through a local HTTP server when developing, for example `python3 -m http.server 8000 --directory docs` from the repository root.
+A static six-chapter presentation, served from `docs/`: Overview, Shared geometry, Framework, Interface, Results and Experiments. Develop with `python3 -m http.server 8000 --directory docs` from the repository root. The downloadable review package includes a separately bundled offline entry.
 
-The dark presentation has eight pages: overview, shared geometry, framework, interface, results, recorded experiments, paper figures and paper. It includes shared-neighborhood exploration, a perception-to-dynamics connection diagram, a computed spatial-resampling illustration, full-cohort result comparisons and five recorded matched-task videos.
+## A continuous explanation
 
-The header contains chapter navigation, without a brand mark. Previous/next buttons, keyboard navigation and horizontal touch gestures switch pages. Auto play runs a silent 4 minute 33 second tour; its shared timeline advances method steps, interface stages, evaluation cohorts and all five original videos. The footer supports pause, replay and seeking. Interacting with a figure pauses the tour. Video loading pauses its clock, recordings play at their original speed, and switching tabs stops playback. Mobile diagrams have separate vertical layouts.
+Shared geometry changes its actual visual representation across three stages. Two independently trained encoders first display their separate projected spaces. The next stage shows ranked nearest-neighbor lists, connecting the same observations across encoders. Finally, three animated histograms count all observations in each independent model pair. These use measured data, not synthetic point arrangements presented as measurements.
 
-## Evidence and interaction
+The framework is one native SVG, drawn with web text, paths, grids and flow animation. Its topology follows the manuscript: source history and goal, the shared learned interface, frozen dynamics, goal cost, residual spatial resampling and the paired-state calibration inset. Four stages highlight calibration, the bilinear base, residual correction and frozen rollout. Shape labels use 256 source tokens × 192 channels, consistent with the method equation. The separate interface chapter computes a teaching example of the spatial operation.
 
-- `assets/data/geometry.json` contains all 606 observations for each of three independent LeWM pairs. Nearest-neighbor sets come from the original 192-dimensional features. Separate t-SNE projections and a rigid display registration for B provide the 3D layout. Display rotations and per-cloud display scaling do not alter neighbor sets or metrics.
-- `assets/images/observations.webp` is a 32-column sprite containing the same observations in order. The final row contains unused blank slots.
-- `assets/data/results.json` contains complete-cohort means for the displayed studies. Native-success retention counts paired successes. The chart includes each available method for its selected study. The paper supplies uncertainty estimates and full protocol details.
-- `assets/videos/` contains the recorded examples and posters. Video clips retain their original frames and time windows. The video text identifies selected cases and the development Reacher cohort.
-- The resampling animation uses deterministic illustrative scalar features and normalized spatial attention weights. It shows the operator structure and shapes, with queries formed from the resampled target grid. These teaching values are separate from trained model activations.
+Manuscript evidence appears where it supports the explanation. Prediction controls and calibration budgets sit within Results. Matched task comparisons, Granular/RoboTwin readouts and driving scenarios sit within Experiments beside the recorded executions. There is no separate figure catalog or manuscript chapter.
+
+## Evidence
+
+- `assets/data/geometry.json`: 606 observations per independent LeWM pair; three pairs. Retrieval uses original 192D features. Separate t-SNE projections and a rigid display registration provide the rotating 3D layouts. Display motion does not alter measured neighbors. Ranked-list links match actual observation IDs. Histograms count all 606 measured overlaps per pair.
+- `assets/images/observations.webp`: sprite of those observations; 32 columns with unused slots in the last row.
+- `assets/data/results.json`: complete-cohort means and paired native-success retention. Available method comparisons remain intact.
+- `assets/videos/`: five original recorded comparisons and posters, preserving all frames, native speed and original time windows. Selected cases are distinguished from cohort statistics.
+- `assets/paper-figures/`: original exports plus dark display variants. Photographic and error-map image pixels are unchanged. The prediction-control matrix is redrawn using the exact four-direction values in the detailed manuscript table; color normalizes error within each receiver. `manifest.json` records experimental scopes.
+- RoboTwin RGB readouts are post-hoc retrievals from a common observed-frame bank containing true futures; they are not generated images or executed trajectories. Driving panels preserve their selected simulated replay scope.
+- The interface animation uses deterministic illustrative scalar features and spatial attention weights, distinct from trained activations. The framework grid sweeps illustrate data flow rather than measured attention.
 - `assets/UniGeom.pdf` is the anonymous main manuscript.
+
+## Controls
+
+The shared tour lasts 4 minutes 7 seconds. Chapter buttons, previous/next, keyboard navigation and horizontal touch gestures navigate the presentation. Auto play, pause, replay and seek share one timeline; recordings pause its clock while buffering. Manual inspection pauses automatic progression. Enlarging a result keeps its caption and scope visible. A reduced-motion preference suppresses decorative motion while preserving meaningful state changes. On small screens, dense architecture detail scrolls within its own canvas.
 
 The anonymous website omits author identities and affiliations. Its paper and social preview are independently prepared anonymous assets.
 
 ## Credits
 
-The explanatory interaction was inspired by [Shared Geometry as a Rosetta Stone](https://dominik-schnaus.github.io/unpaired-rosetta/). This site has its own implementation, visual identity and UniGeom data. Manrope is distributed under the SIL Open Font License in `assets/fonts/OFL.txt`.
-
-Keyboard controls include arrow navigation within tab lists, observation browsing on the geometry canvas and target-token selection in the spatial illustration. The page respects reduced-motion preferences. Switching pages pauses the local connection sequence. Videos pause when leaving the viewport or hiding the page.
-
-## Original manuscript figures
-
-`assets/paper-figures/manifest.json` identifies eight original figures or panels from the current manuscript, with the original experimental scopes. Framework and schematic assets are exported directly from the paper PDFs as SVG with outlined glyphs. They are not redrawn interpretations. Raster observations embedded in those PDFs retain their original pixels. The framework page offers the exact original figure and a separate animated explanation. All eight figures can be enlarged, zoomed and saved.
-
-Shared geometry now has three stages: independent coordinate spaces, common nearest neighbors and the distribution across model pairs. Its autoplay segment lasts 42 seconds. Enlarged point clouds and swept correspondence curves use the unchanged observation IDs; their appearance and camera motion do not change the measured neighborhoods. The figure gallery adds navigation, Reacher, driving, Granular and RoboTwin evidence. RoboTwin image readouts remain explicitly identified as post-hoc retrievals, not executed rollouts.
+Interaction inspired by [Shared Geometry as a Rosetta Stone](https://dominik-schnaus.github.io/unpaired-rosetta/). This site uses its own implementation and UniGeom evidence. Manrope is distributed under the SIL Open Font License in `assets/fonts/OFL.txt`.
