@@ -1,0 +1,282 @@
+[
+  {
+    "study": "brightness",
+    "method": "clean",
+    "tasks": 64,
+    "seeds": 3,
+    "recorded_episodes": 192,
+    "terminal_pct": 0.0,
+    "native_terminal_retained_pct": 0.0,
+    "holding_pct": 0.0,
+    "native_holding_retained_pct": 0.0,
+    "overlap_pct": 16.04030370947671
+  },
+  {
+    "study": "brightness",
+    "method": "mixed",
+    "tasks": 64,
+    "seeds": 3,
+    "recorded_episodes": 192,
+    "terminal_pct": 59.375,
+    "native_terminal_retained_pct": 58.730158730158735,
+    "holding_pct": 59.375,
+    "native_holding_retained_pct": 58.730158730158735,
+    "overlap_pct": 68.34634347237753
+  },
+  {
+    "study": "brightness",
+    "method": "native",
+    "tasks": 64,
+    "seeds": 1,
+    "recorded_episodes": 64,
+    "terminal_pct": 98.4375,
+    "native_terminal_retained_pct": 100.0,
+    "holding_pct": 98.4375,
+    "native_holding_retained_pct": 100.0,
+    "overlap_pct": 87.60316389294177
+  },
+  {
+    "study": "navigation",
+    "method": "native",
+    "tasks": 64,
+    "seeds": 1,
+    "recorded_episodes": 64,
+    "terminal_pct": 81.25,
+    "native_terminal_retained_pct": 100.0,
+    "holding_pct": 45.3125,
+    "native_holding_retained_pct": 100.0,
+    "distance": 17.990147926788506
+  },
+  {
+    "study": "navigation",
+    "method": "pooled",
+    "tasks": 64,
+    "seeds": 3,
+    "recorded_episodes": 192,
+    "terminal_pct": 81.77083333333334,
+    "native_terminal_retained_pct": 94.87179487179486,
+    "holding_pct": 50.520833333333336,
+    "native_holding_retained_pct": 73.5632183908046,
+    "distance": 17.210109546647995
+  },
+  {
+    "study": "navigation",
+    "method": "pooled-compute",
+    "tasks": 64,
+    "seeds": 3,
+    "recorded_episodes": 192,
+    "terminal_pct": 83.85416666666666,
+    "native_terminal_retained_pct": 98.07692307692307,
+    "holding_pct": 51.041666666666664,
+    "native_holding_retained_pct": 72.41379310344827,
+    "distance": 16.092936660122376
+  },
+  {
+    "study": "navigation",
+    "method": "ridge",
+    "tasks": 64,
+    "seeds": 1,
+    "recorded_episodes": 64,
+    "terminal_pct": 7.8125,
+    "native_terminal_retained_pct": 9.615384615384617,
+    "holding_pct": 1.5625,
+    "native_holding_retained_pct": 3.4482758620689653,
+    "distance": 75.18583583517413
+  },
+  {
+    "study": "navigation",
+    "method": "spatial",
+    "tasks": 64,
+    "seeds": 3,
+    "recorded_episodes": 192,
+    "terminal_pct": 79.16666666666666,
+    "native_terminal_retained_pct": 97.43589743589743,
+    "holding_pct": 52.083333333333336,
+    "native_holding_retained_pct": 83.9080459770115,
+    "distance": 19.385843700337468
+  },
+  {
+    "study": "reacher_broad",
+    "method": "mlp",
+    "tasks": 8,
+    "seeds": 3,
+    "recorded_episodes": 24,
+    "return_sum": 204.79166666666666
+  },
+  {
+    "study": "reacher_broad",
+    "method": "native",
+    "tasks": 8,
+    "seeds": 1,
+    "recorded_episodes": 8,
+    "return_sum": 813.375
+  },
+  {
+    "study": "reacher_broad",
+    "method": "ridge-10",
+    "tasks": 8,
+    "seeds": 1,
+    "recorded_episodes": 8,
+    "return_sum": 142.0
+  },
+  {
+    "study": "reacher_broad",
+    "method": "self",
+    "tasks": 8,
+    "seeds": 1,
+    "recorded_episodes": 8,
+    "return_sum": 813.375
+  },
+  {
+    "study": "reacher_long",
+    "method": "mlp",
+    "tasks": 8,
+    "seeds": 3,
+    "recorded_episodes": 24,
+    "return_sum": 124.45833333333334
+  },
+  {
+    "study": "reacher_long",
+    "method": "native",
+    "tasks": 8,
+    "seeds": 1,
+    "recorded_episodes": 8,
+    "return_sum": 813.375
+  },
+  {
+    "study": "reacher_long",
+    "method": "ridge-10",
+    "tasks": 8,
+    "seeds": 1,
+    "recorded_episodes": 8,
+    "return_sum": 90.25
+  },
+  {
+    "study": "reacher_long",
+    "method": "self",
+    "tasks": 8,
+    "seeds": 1,
+    "recorded_episodes": 8,
+    "return_sum": 813.375
+  },
+  {
+    "study": "second_source",
+    "method": "attention",
+    "tasks": 96,
+    "seeds": 3,
+    "recorded_episodes": 288,
+    "terminal_pct": 70.4861111111111,
+    "native_terminal_retained_pct": 70.2127659574468,
+    "holding_pct": 70.4861111111111,
+    "native_holding_retained_pct": 70.2127659574468,
+    "overlap_pct": 78.45922943684491
+  },
+  {
+    "study": "second_source",
+    "method": "convolution",
+    "tasks": 96,
+    "seeds": 3,
+    "recorded_episodes": 288,
+    "terminal_pct": 78.125,
+    "native_terminal_retained_pct": 78.72340425531915,
+    "holding_pct": 78.125,
+    "native_holding_retained_pct": 78.72340425531915,
+    "overlap_pct": 80.83222644785472
+  },
+  {
+    "study": "second_source",
+    "method": "fixed",
+    "tasks": 96,
+    "seeds": 3,
+    "recorded_episodes": 288,
+    "terminal_pct": 75.0,
+    "native_terminal_retained_pct": 76.24113475177305,
+    "holding_pct": 75.0,
+    "native_holding_retained_pct": 76.24113475177305,
+    "overlap_pct": 78.99912762958473
+  },
+  {
+    "study": "second_source",
+    "method": "native",
+    "tasks": 96,
+    "seeds": 1,
+    "recorded_episodes": 96,
+    "terminal_pct": 97.91666666666666,
+    "native_terminal_retained_pct": 100.0,
+    "holding_pct": 97.91666666666666,
+    "native_holding_retained_pct": 100.0,
+    "overlap_pct": 88.07515923250433
+  },
+  {
+    "study": "second_source",
+    "method": "self",
+    "tasks": 96,
+    "seeds": 3,
+    "recorded_episodes": 288,
+    "terminal_pct": 97.56944444444444,
+    "native_terminal_retained_pct": 98.58156028368793,
+    "holding_pct": 97.56944444444444,
+    "native_holding_retained_pct": 98.58156028368793,
+    "overlap_pct": 86.54776703680761
+  },
+  {
+    "study": "spatial",
+    "method": "attention",
+    "tasks": 96,
+    "seeds": 3,
+    "recorded_episodes": 288,
+    "terminal_pct": 46.18055555555555,
+    "native_terminal_retained_pct": 46.666666666666664,
+    "holding_pct": 46.18055555555555,
+    "native_holding_retained_pct": 46.666666666666664,
+    "overlap_pct": 65.37204748650066
+  },
+  {
+    "study": "spatial",
+    "method": "convolution",
+    "tasks": 96,
+    "seeds": 3,
+    "recorded_episodes": 288,
+    "terminal_pct": 42.36111111111111,
+    "native_terminal_retained_pct": 43.7037037037037,
+    "holding_pct": 42.36111111111111,
+    "native_holding_retained_pct": 43.7037037037037,
+    "overlap_pct": 65.28231289495427
+  },
+  {
+    "study": "spatial",
+    "method": "fixed",
+    "tasks": 96,
+    "seeds": 3,
+    "recorded_episodes": 288,
+    "terminal_pct": 36.80555555555555,
+    "native_terminal_retained_pct": 37.407407407407405,
+    "holding_pct": 36.80555555555555,
+    "native_holding_retained_pct": 37.407407407407405,
+    "overlap_pct": 62.44879334236102
+  },
+  {
+    "study": "spatial",
+    "method": "native",
+    "tasks": 96,
+    "seeds": 1,
+    "recorded_episodes": 96,
+    "terminal_pct": 93.75,
+    "native_terminal_retained_pct": 100.0,
+    "holding_pct": 93.75,
+    "native_holding_retained_pct": 100.0,
+    "overlap_pct": 88.4977515247836
+  },
+  {
+    "study": "spatial",
+    "method": "self",
+    "tasks": 96,
+    "seeds": 3,
+    "recorded_episodes": 288,
+    "terminal_pct": 94.44444444444444,
+    "native_terminal_retained_pct": 97.03703703703704,
+    "holding_pct": 94.44444444444444,
+    "native_holding_retained_pct": 97.03703703703704,
+    "overlap_pct": 85.71324929184638
+  }
+]

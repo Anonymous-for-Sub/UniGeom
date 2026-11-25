@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>UniGeom — Shared Geometry for World Models</title>
+    <meta
+      name="description"
+      content="Connect independently trained perception to frozen world models. Explore shared representation geometry, lightweight interfaces, and recorded prediction and control experiments."
+    />
+    <meta name="theme-color" content="#8080ff" />
+    <meta
+      property="og:title"
+      content="UniGeom: Shared Geometry for World Models"
+    />
+    <meta
+      property="og:description"
+      content="From shared representations to reusable prediction and control."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:image"
+      content="https://anonymous-for-sub.github.io/UniGeom/assets/images/social.png"
+    />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/site.css" />
+    <script type="module" src="assets/site.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#explore">Skip to interactive exploration</a>
+    <header class="site-header">
+      <a class="brand" href="#home" aria-label="UniGeom home"
+        ><span class="brand-symbol" aria-hidden="true">∪</span>UniGeom<span
+          class="brand-dot"
+          >.</span
+        ></a
+      >
+      <nav aria-label="Main navigation">
+        <a href="#explore">Explore</a><a href="#experiments">Experiments</a
+        ><a href="#paper">Paper</a
+        ><a
+          class="nav-code"
+          href="https://github.com/Anonymous-for-Sub/UniGeom"
+          >Code <span aria-hidden="true">↗</span></a
+        >
+      </nav>
+    </header>
+    <main>
+      <section class="hero wrap" id="home">
+        <div class="hero-copy">
+          <p class="eyebrow">Shared representations. Reusable dynamics.</p>
+          <h1>UniGeom<span class="hero-period">.</span></h1>
+          <h2>Shared Geometry<br />for World Models</h2>
+          <p class="hero-description">
+            Can one model’s perception drive another model’s predictions? We
+            connect independently trained representations to frozen world models
+            through lightweight, calibrated interfaces.
+          </p>
+          <div class="authors">Anonymous submission</div>
+          <div class="hero-actions">
+            <a class="button primary" href="#explore"
+              >Explore the connection <span aria-hidden="true">↗</span></a
+            ><a
+              class="button"
+              href="assets/UniGeom.pdf"
+              target="_blank"
+              rel="noopener"
+              >Read the paper <span aria-hidden="true">↗</span></a
+            >
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-halo"></div>
+          <canvas
+            id="hero-cloud"
+            aria-label="Two measured representation spaces from independently trained LeWM encoders"
+          ></canvas>
+          <div class="hero-cloud-label a">Perception A</div>
+          <div class="hero-cloud-label b">Perception B</div>
+          <div class="hero-connection">
+            <span class="connection-line"></span><span>Shared structure</span
+            ><span class="connection-line"></span>
+          </div>
+          <p class="hero-evidence">
+            606 shared observations · two independently trained encoders
+          </p>
+        </div>
+      </section>
+      <div class="thesis wrap">
+        <span class="thesis-rule"></span>
+        <p>
+          Shared geometry gives us a starting point.<br /><strong
+            >Prediction and control tell us whether the connection
+            works.</strong
+          >
+        </p>
+        <a href="#explore" aria-label="Explore below">↓</a>
+      </div>
+      <section id="explore" class="explore-section wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">An interactive view</p>
+            <h2>Follow the connection.</h2>
+          </div>
+          <p>From the same observation to another model’s future.</p>
+        </div>
+        <div class="workbench">
+          <div
+            class="chapter-tabs"
+            role="tablist"
+            aria-label="Research chapters"
+          >
+            <button
+              id="tab-geometry"
+              role="tab"
+              aria-controls="panel-geometry"
+              aria-selected="true"
+              data-chapter="geometry"
+            >
+              Shared geometry</button
+            ><button
+              id="tab-connection"
+              role="tab"
+              aria-controls="panel-connection"
+              aria-selected="false"
+              tabindex="-1"
+              data-chapter="connection"
+            >
+              The connection</button
+            ><button
+              id="tab-interface"
+              role="tab"
+              aria-controls="panel-interface"
+              aria-selected="false"
+              tabindex="-1"
+              data-chapter="interface"
+            >
+              Inside the interface</button
+            ><button
+              id="tab-results"
+              role="tab"
+              aria-controls="panel-results"
+              aria-selected="false"
+              tabindex="-1"
+              data-chapter="results"
+            >
+              Control results
+            </button>
+          </div>
+          <section
+            id="panel-geometry"
+            class="chapter active"
+            role="tabpanel"
+            aria-labelledby="tab-geometry"
+          >
+            <aside class="chapter-copy">
+              <p class="eyebrow">The starting point</p>
+              <h3>Different coordinates.<br /> Similar neighbors.</h3>
+              <p>
+                Two independent LeWM encoders see the same 606 observations.
+                Select a point to find the ten observations each encoder
+                considers most similar.
+              </p>
+              <label class="field"
+                >Independent model pair<select id="geometry-pair">
+                  <option value="0">LeWM · Pair 1</option>
+                  <option value="1">LeWM · Pair 2</option>
+                  <option value="2">LeWM · Pair 3</option>
+                </select></label
+              >
+              <div class="query-card">
+                <div
+                  class="observation"
+                  id="query-image"
+                  role="img"
+                  aria-label="Selected PushT observation"
+                ></div>
+                <div>
+                  <span class="small-label" id="query-id">Observation</span
+                  ><strong id="query-overlap">Loading…</strong
+                  ><span class="small-label">shared nearest neighbors</span>
+                </div>
+              </div>
+              <div class="query-buttons">
+                <button id="previous-query" aria-label="Previous observation">
+                  ←</button
+                ><button id="next-query">Next observation →</button>
+              </div>
+              <div class="cohort-stat">
+                <strong id="geometry-mean">—</strong
+                ><span
+                  >mean neighbor overlap<br />across all 606 observations</span
+                >
+              </div>
+              <p class="footnote">
+                Neighbors are measured in the original 192D features. The 3D
+                t-SNE views use a rigid display registration for B.
+              </p>
+            </aside>
+            <div class="chapter-stage geometry-stage">
+              <div class="stage-top">
+                <span
+                  ><i class="legend-dot violet"></i> Shared neighbor
+                  <i class="legend-dot teal"></i> B only
+                  <i class="legend-dot sand"></i> A only</span
+                ><button id="reset-camera" class="text-button">
+                  Reset view ↺
+                </button>
+              </div>
+              <canvas
+                id="geometry-cloud"
+                tabindex="0"
+                aria-label="Interactive 3D representation spaces. Drag to rotate, click a point to inspect, or use the observation buttons."
+              ></canvas>
+              <div class="cloud-labels">
+                <span>Encoder A</span><span>Encoder B</span>
+              </div>
+              <div
+                id="neighbor-strip"
+                class="neighbor-strip"
+                aria-label="Selected encoder A neighbors"
+              ></div>
+              <p class="stage-hint">
+                Drag to rotate · select a point to inspect its neighborhood
+              </p>
+              <p class="data-error" id="geometry-error" hidden></p>
+            </div>
+          </section>
+          <section
+            id="panel-connection"
+            class="chapter"
+            role="tabpanel"
+            aria-labelledby="tab-connection"
+            hidden
+          >
+            <aside class="chapter-copy">
+              <p class="eyebrow">The functional test</p>
+              <h3>New perception.<br /> Existing dynamics.</h3>
+              <p>
+                A paired observation gives two feature targets automatically. We
+                learn their correspondence while keeping both encoders and the
+                receiver’s dynamics frozen.
+              </p>
+              <div class="step-list" id="connection-steps">
+                <button class="selected" data-step="0">
+                  <span>01</span> Encode a shared observation</button
+                ><button data-step="1">
+                  <span>02</span> Calibrate the interface</button
+                ><button data-step="2">
+                  <span>03</span> Predict with the receiver</button
+                ><button data-step="3">
+                  <span>04</span> Execute and observe again
+                </button>
+              </div>
+              <p id="connection-detail" class="detail-copy"></p>
+              <button class="button small" id="play-connection">
+                Play the sequence
+              </button>
+            </aside>
+            <div class="chapter-stage connection-stage">
+              <div class="stage-top">
+                <span
+                  ><i class="legend-dot violet"></i> Trainable interface
+                  <i class="legend-dot teal"></i> Frozen receiver</span
+                ><span class="small-label">Architecture illustration</span>
+              </div>
+              <svg
+                id="connection-diagram"
+                viewBox="0 0 760 460"
+                role="img"
+                aria-label="Source perception connects through a calibrated interface to the frozen receiver dynamics. The receiver encoder supplies calibration targets."
+              ></svg>
+              <div class="equation">
+                F<sub>B</sub>( T<sub>A→B</sub>( E<sub>A</sub>(o<sub>t</sub>) ),
+                a<sub>t</sub> ) → ẑ<sub>t+1</sub><sup>B</sup>
+              </div>
+              <p class="stage-hint">
+                History and goal use the same interface. The controller keeps
+                the receiver’s action conventions.
+              </p>
+            </div>
+          </section>
+          <section
+            id="panel-interface"
+            class="chapter"
+            role="tabpanel"
+            aria-labelledby="tab-interface"
+            hidden
+          >
+            <aside class="chapter-copy">
+              <p class="eyebrow">Residual spatial resampling</p>
+              <h3>Translate the layout.<br /> Preserve the interface.</h3>
+              <p>
+                LeWM’s 16 × 16 token grid is converted to the 14 × 14 grid
+                expected by DINO-WM. A learned residual refines a bilinear base
+                before channel projection.
+              </p>
+              <div class="step-list" id="interface-steps">
+                <button class="selected" data-stage="0">
+                  <span>01</span> Resample the source grid</button
+                ><button data-stage="1">
+                  <span>02</span> Attend to source tokens</button
+                ><button data-stage="2">
+                  <span>03</span> Add the spatial residual</button
+                ><button data-stage="3">
+                  <span>04</span> Restore receiver features
+                </button>
+              </div>
+              <p id="interface-detail" class="detail-copy"></p>
+              <label class="field" id="head-control"
+                >Illustrative attention head<select id="attention-head">
+                  <option value="0">Head 1</option>
+                  <option value="1">Head 2</option>
+                </select></label
+              >
+            </aside>
+            <div class="chapter-stage interface-stage">
+              <div class="stage-top">
+                <span>LeWM → DINO-WM</span
+                ><span class="small-label">Computed teaching example</span>
+              </div>
+              <svg
+                id="interface-diagram"
+                viewBox="0 0 760 480"
+                role="img"
+                aria-label="Interactive token resampling. Select a target token to inspect its source contributions."
+              ></svg>
+              <p id="interface-equation" class="equation"></p>
+              <p class="stage-hint">
+                Select a target token. Colors show illustrative scalar values
+                and computed weights.
+              </p>
+            </div>
+          </section>
+          <section
+            id="panel-results"
+            class="chapter"
+            role="tabpanel"
+            aria-labelledby="tab-results"
+            hidden
+          >
+            <aside class="chapter-copy">
+              <p class="eyebrow">Measured functional outcomes</p>
+              <h3>Evaluate what<br /> the receiver can do.</h3>
+              <p>
+                Compare complete evaluation cohorts. Every connected route uses
+                the receiver’s existing prediction and control system.
+              </p>
+              <label class="field"
+                >Experiment<select id="results-study">
+                  <option value="navigation">TwoRooms · MAE → LeWM</option>
+                  <option value="spatial">PushT · LeWM → DINO-WM</option>
+                  <option value="second_source">PushT · MAE → DINO-WM</option>
+                  <option value="brightness">PushT · view recalibration</option>
+                </select></label
+              ><label class="field"
+                >Metric<select id="results-metric">
+                  <option value="terminal_pct">Terminal success (%)</option>
+                  <option value="native_terminal_retained_pct">
+                    Native successes retained (%)
+                  </option>
+                  <option value="holding_pct">Last-ten success (%)</option>
+                </select></label
+              >
+              <p id="results-context" class="detail-copy"></p>
+              <a
+                href="assets/UniGeom.pdf"
+                class="text-link"
+                target="_blank"
+                rel="noopener"
+                >Full protocols and comparisons ↗</a
+              >
+            </aside>
+            <div class="chapter-stage results-stage">
+              <div class="stage-top">
+                <span id="chart-title">Terminal success (%)</span
+                ><span id="chart-cohort" class="small-label"></span>
+              </div>
+              <div id="results-chart" role="img"></div>
+              <div class="result-insight" id="result-insight"></div>
+              <p class="stage-hint" id="results-note"></p>
+            </div>
+          </section>
+        </div>
+      </section>
+      <section id="experiments" class="experiments-section wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Recorded executions</p>
+            <h2>Watch the difference.</h2>
+          </div>
+          <p>Same initial state. Same task. Different interfaces.</p>
+        </div>
+        <div class="experiment-layout">
+          <div
+            class="experiment-list"
+            role="tablist"
+            aria-label="Recorded experiment"
+          >
+            <button
+              class="active"
+              data-case="0"
+              role="tab"
+              aria-selected="true"
+            >
+              <span>Navigation</span><small>MAE → LeWM</small><b>↗</b></button
+            ><button
+              data-case="1"
+              role="tab"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <span>Spatial connection</span><small>LeWM → DINO-WM</small
+              ><b>↗</b></button
+            ><button
+              data-case="2"
+              role="tab"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <span>A different source</span><small>MAE → DINO-WM</small
+              ><b>↗</b></button
+            ><button
+              data-case="3"
+              role="tab"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <span>View recalibration</span
+              ><small>Clean → mixed calibration</small><b>↗</b></button
+            ><button
+              data-case="4"
+              role="tab"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <span>Recurrent control</span><small>LeWM → Dreamer</small
+              ><b>↗</b>
+            </button>
+          </div>
+          <div class="experiment-player">
+            <video
+              id="case-video"
+              controls
+              playsinline
+              preload="metadata"
+              poster="assets/videos/01_navigation.png"
+              src="assets/videos/01_navigation.mp4"
+              aria-label="Navigation comparison"
+            ></video>
+            <div class="case-description">
+              <div>
+                <h3 id="case-title">Arrive at the same goal.</h3>
+                <p id="case-description"></p>
+              </div>
+              <div class="case-metric">
+                <span id="case-metric-label">Final distance to goal</span
+                ><strong id="case-metric"
+                  >102.0 <span>→</span> 1.3 <small>px</small></strong
+                >
+              </div>
+            </div>
+            <p class="footnote" id="case-note"></p>
+          </div>
+        </div>
+        <p class="media-note">
+          Selected matched-task examples from recorded simulation trajectories.
+          Aggregate comparisons are available in the interactive results above
+          and the paper.
+        </p>
+      </section>
+      <section class="findings-band">
+        <div class="wrap findings-grid">
+          <div>
+            <p class="eyebrow">What the experiments show</p>
+            <h2>
+              Correspondence opens<br />the connection.<br /><em
+                >Calibration makes it useful.</em
+              >
+            </h2>
+          </div>
+          <div class="findings-copy">
+            <article>
+              <h3>Learned perception carries reusable information.</h3>
+              <p>
+                Small paired interfaces connect independently trained LeWM
+                representations and heterogeneous visual encoders to existing
+                dynamics.
+              </p>
+            </article>
+            <article>
+              <h3>Functional compatibility needs its own evaluation.</h3>
+              <p>
+                State similarity, future prediction and executed control measure
+                different aspects of a connection. Interface structure and
+                calibration coverage change what is retained.
+              </p>
+            </article>
+            <article>
+              <h3>The receiver determines the interface.</h3>
+              <p>
+                Global, spatial and recurrent receivers impose different feature
+                and history requirements. We test each connection through its
+                native prediction and control path.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section id="paper" class="paper-section wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">The paper</p>
+            <h2>Shared Geometry for World Models.</h2>
+          </div>
+          <a
+            class="button primary"
+            href="assets/UniGeom.pdf"
+            target="_blank"
+            rel="noopener"
+            >Read the manuscript ↗</a
+          >
+        </div>
+        <div class="paper-grid">
+          <p>
+            Independently trained models can describe the same world in
+            different representation spaces. UniGeom studies whether their
+            shared structure supports functional connections. We calibrate
+            lightweight interfaces from common observations, freeze the base
+            models, and evaluate how much prediction and control capability
+            survives perception replacement. Experiments connect global
+            representations, spatial token grids and a recurrent receiver,
+            revealing how interface design and observation coverage affect the
+            resulting behavior.
+          </p>
+          <div class="citation">
+            <div class="citation-head">
+              <span>BibTeX</span
+              ><button id="copy-citation">Copy citation</button>
+            </div>
+            <pre id="bibtex">
+@misc{unigeom2026,
+  title={UniGeom: Shared Geometry for World Models},
+  author={Anonymous},
+  year={2026},
+  howpublished={Anonymous manuscript}
+}</pre>
+            <span id="copy-status" role="status"></span>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="wrap">
+      <a class="brand" href="#home">UniGeom<span class="brand-dot">.</span></a>
+      <p>
+        Interactive presentation inspired by
+        <a
+          href="https://dominik-schnaus.github.io/unpaired-rosetta/"
+          target="_blank"
+          rel="noopener"
+          >Shared Geometry as a Rosetta Stone</a
+        >.
+      </p>
+      <a
+        href="https://github.com/Anonymous-for-Sub/UniGeom"
+        >Code ↗</a
+      >
+    </footer>
+    <noscript
+      ><p class="wrap">
+        Enable JavaScript for interactive figures. The manuscript and recorded
+        videos are available through the links above.
+      </p></noscript
+    >
+  </body>
+</html>

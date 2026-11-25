@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](pyproject.toml)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.2%2B-orange.svg)](pyproject.toml)
 [![tests](https://github.com/Anonymous-for-Sub/UniGeom/actions/workflows/tests.yml/badge.svg)](https://github.com/Anonymous-for-Sub/UniGeom/actions/workflows/tests.yml)
-[![Project page: planned](https://img.shields.io/badge/Project_page-planned-lightgrey.svg)](#project-links)
+[![Project page](https://img.shields.io/badge/Project_page-UniGeom-8080ff.svg)](https://anonymous-for-sub.github.io/UniGeom/)
 [![arXiv: planned](https://img.shields.io/badge/arXiv-planned-lightgrey.svg)](#project-links)
 
 PyTorch interfaces that map frozen visual representations into the native state space of a frozen receiver dynamics model. Fit adapters from paired features of the same observations, then use the receiver's existing prediction and action conventions.
@@ -85,7 +85,7 @@ See [integration](docs/integration.md) for calibration, encoder extraction, spat
 
 ## Project links
 
-The project page and arXiv entry are planned. Links will be added here when available.
+[Explore the anonymous interactive project page](https://anonymous-for-sub.github.io/UniGeom/) for the method, measured geometry, recorded comparisons and anonymous manuscript. An arXiv link will be added when available.
 
 ## License
 
