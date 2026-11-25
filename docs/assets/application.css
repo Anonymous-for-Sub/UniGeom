@@ -1,0 +1,175 @@
+#application-scene {
+  min-width: 0;
+  border: 1px solid #3a3947;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #15151c;
+  color: #ebebf4;
+}
+.application-stage {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  min-width: 0;
+}
+#application-scene .app-viewport {
+  position: relative;
+  height: clamp(254px, 45vh, 470px);
+  isolation: isolate;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse at 45% 80%,
+    #363644,
+    #22232e 65%,
+    #17171f
+  );
+}
+#application-scene canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y;
+  cursor: grab;
+}
+#application-scene canvas:active {
+  cursor: grabbing;
+}
+#application-scene canvas:focus-visible {
+  outline: 2px solid #a29cff;
+  outline-offset: -4px;
+}
+.app-location,
+.app-reset {
+  position: absolute;
+  top: 12px;
+  border: 1px solid #79788667;
+  border-radius: 100px;
+  background: #17171fe8;
+  font-family: inherit;
+  font-weight: 500;
+  color: #eeedf4;
+  font-size: 12px;
+  line-height: 1.2;
+  padding: 6px 10px;
+}
+.app-location {
+  left: 12px;
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  pointer-events: none;
+}
+.app-location i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a29cff;
+}
+#application-scene[data-stage="2"] .app-location i {
+  background: #90ddc8;
+}
+.app-reset {
+  right: 12px;
+  cursor: pointer;
+}
+.app-status {
+  position: absolute;
+  inset: auto 12px 12px;
+  margin: 0;
+  color: #dfdfed;
+  font-size: 13px;
+}
+.app-route {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(5px, 1vw, 13px);
+  padding: 12px;
+  border-top: 1px solid #393843;
+  background: #1b1b23;
+  font-size: 14px;
+  line-height: 1.2;
+}
+.app-route span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+.app-route b {
+  color: #83818f;
+  font-weight: 400;
+}
+.app-encoder {
+  color: #c6c1fa;
+}
+.app-bridge {
+  color: #dfddea;
+}
+#application-scene[data-stage="1"] .app-bridge {
+  color: #c2bcff;
+}
+.app-predictor {
+  color: #a9e8d6;
+}
+.app-predictor i {
+  width: 9px;
+  height: 7px;
+  border: 1px solid currentColor;
+  border-radius: 1px;
+  position: relative;
+  margin-top: 3px;
+}
+.app-predictor i::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 1px;
+  width: 4px;
+  height: 5px;
+  border: 1px solid currentColor;
+  border-radius: 4px 4px 0 0;
+}
+@media (max-width: 760px) {
+  #application-scene .app-viewport {
+    height: clamp(200px, 45vw, 300px);
+  }
+  .app-route {
+    padding: 10px 5px;
+    gap: 5px;
+    font-size: 10px;
+  }
+  .app-route span {
+    gap: 4px;
+  }
+  .app-location {
+    top: 8px;
+    left: 8px;
+    font-size: 10px;
+    padding: 4px 7px;
+  }
+}
+
+.app-bridge svg {
+  display: none;
+}
+#application-scene[data-stage="1"] .app-bridge svg,
+#application-scene[data-stage="2"] .app-bridge svg {
+  display: block;
+}
+#application-scene[data-stage="1"] .app-bridge path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: var(--app-pair-offset, 1);
+}
+@media (max-width: 480px) {
+  .app-bridge svg {
+    width: 18px;
+    height: 15px;
+  }
+  .app-route {
+    gap: 3px;
+  }
+}

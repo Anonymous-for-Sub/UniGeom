@@ -2,6 +2,7 @@ const $ = (s) => document.querySelector(s);
 const pages = [
   { id: "overview", label: "Overview", duration: 14000 },
   { id: "geometry", label: "Shared geometry", duration: 42000 },
+  { id: "application", label: "Application", duration: 36000 },
   { id: "connection", label: "Framework", duration: 32000 },
   { id: "interface", label: "Interface", duration: 24000 },
   { id: "experiments", label: "Experiments", duration: 87000 },
@@ -19,6 +20,50 @@ const cases = [
   { start: 22500, end: 30000, duration: 5.5 },
   { start: 30000, end: 57000, duration: 20.2 },
 ];
+// Manual navigation follows meaningful substeps, not just chapter boundaries.
+const stops = {
+  overview: [[0, "Overview"]],
+  geometry: [
+    [0, "Two spaces"],
+    [12000, "Shared neighbors"],
+    [28000, "Shared structure"],
+  ],
+  application: [
+    [0, "Start with learned dynamics"],
+    [12000, "Connect new perception"],
+    [24000, "Reuse for manipulation"],
+  ],
+  connection: [
+    [0, "Calibrate"],
+    [8000, "Resample"],
+    [16000, "Refine"],
+    [24000, "Predict"],
+  ],
+  interface: [
+    [0, "Resample the source grid"],
+    [6000, "Attend to source tokens"],
+    [12000, "Add the spatial residual"],
+    [18000, "Restore receiver features"],
+  ],
+  experiments: [
+    [0, "Navigation"],
+    [7500, "Spatial interface"],
+    [15000, "MAE spatial interface"],
+    [22500, "View recalibration"],
+    [30000, "Recurrent control"],
+    [57000, "Matched executions"],
+    [67000, "Manipulation predictions"],
+    [77000, "Driving context"],
+  ],
+  results: [
+    [0, "TwoRooms control"],
+    [7000, "PushT control"],
+    [14000, "Second source"],
+    [21000, "View recalibration"],
+    [28000, "Prediction checks"],
+    [38000, "Calibration budget"],
+  ],
+};
 export function initDeck(api) {
   let page = 0,
     elapsed = 0,
@@ -40,11 +85,20 @@ export function initDeck(api) {
     $("#page-count").textContent =
       `${String(page + 1).padStart(2, "0")} / ${String(pages.length).padStart(2, "0")}`;
     $("#page-name").textContent = pages[page].label;
-    $("#previous-page").disabled = page === 0;
-    $("#next-page").disabled = page === pages.length - 1;
-    $("#next-page-label").textContent = pages[page + 1]
-      ? `Next: ${pages[page + 1].label}`
-      : "End";
+    const previous = neighbor(-1),
+      next = neighbor(1);
+    for (const [id, target, direction] of [
+      ["previous-page", previous, "Previous"],
+      ["next-page", next, "Next"],
+    ]) {
+      const button = $("#" + id);
+      button.disabled = !target;
+      const label = target
+        ? `${direction}: ${pages[target.page].label} · ${stops[pages[target.page].id][target.stop][1]}`
+        : `${direction}: ${direction === "Previous" ? "beginning" : "end"} of presentation`;
+      button.setAttribute("aria-label", label);
+      button.title = label;
+    }
     const ratio = Math.min(1000, ((offsets[page] + elapsed) / total) * 1000);
     $("#tour-seek").value = ratio;
     $("#tour-seek").style.setProperty("--progress", `${ratio / 10}%`);
@@ -53,12 +107,52 @@ export function initDeck(api) {
       `${pages[page].label}, ${Math.round((elapsed / pages[page].duration) * 100)} percent`,
     );
   }
+  function currentStop() {
+    const list = stops[pages[page].id];
+    return Math.max(
+      0,
+      list.findLastIndex((s) => elapsed >= s[0]),
+    );
+  }
+  function neighbor(direction) {
+    const list = stops[pages[page].id],
+      i = currentStop() + direction;
+    if (i >= 0 && i < list.length) return { page, stop: i };
+    const target = page + direction;
+    if (target < 0 || target >= pages.length) return null;
+    return {
+      page: target,
+      stop: direction > 0 ? 0 : stops[pages[target].id].length - 1,
+    };
+  }
+  function resumeScene() {
+    explicitPause = false;
+    if (pages[page].id === "overview") window.geometryView?.resumeHero();
+    if (pages[page].id === "geometry") window.geometryView?.resumeExploration();
+    if (pages[page].id === "connection") api.connection.resume();
+  }
+  function stepBy(direction) {
+    const target = neighbor(direction);
+    if (!target) return;
+    pause();
+    const local = stops[pages[target.page].id][target.stop][0];
+    if (target.page === page) {
+      elapsed = local;
+      cue = "";
+      sync(true, true);
+      updateControls();
+      $("#page-announcement").textContent =
+        `${pages[page].label}. ${stops[pages[page].id][target.stop][1]}.`;
+    } else change(target.page, local, "push");
+    resumeScene();
+  }
   function pause() {
     playing = false;
     explicitPause = true;
     if (raf) cancelAnimationFrame(raf);
     raf = null;
     api.connection.stop();
+    api.application?.pause();
     v.pause();
     document.querySelectorAll("svg").forEach((el) => el.pauseAnimations?.());
     window.geometryView?.pauseHero();
@@ -73,7 +167,8 @@ export function initDeck(api) {
       0,
       Math.min(segment.duration, (elapsed - segment.start) / 1000),
     );
-    const changed = api.getActiveCase() !== index;
+    const changed =
+      api.getActiveCase() !== index || api.paperViews.experimentFigure !== null;
     if (changed) {
       api.showCase(index);
       mediaGeneration++;
@@ -95,7 +190,7 @@ export function initDeck(api) {
     else if (changed || force)
       v.addEventListener("loadeddata", apply, { once: true });
   }
-  function sync(force = false) {
+  function sync(force = false, previewApplication = false) {
     const id = pages[page].id;
     if (id === "connection") {
       const step = Math.min(3, Math.floor(elapsed / 8000));
@@ -103,6 +198,14 @@ export function initDeck(api) {
         api.connection.setStep(step);
         cue = `connection-${step}`;
       }
+    } else if (id === "application") {
+      const step = Math.min(2, Math.floor(elapsed / 12000));
+      if (cue !== `application-${step}` || force) {
+        api.application.setStage(step);
+        cue = `application-${step}`;
+      }
+      if (playing || !previewApplication || (force && elapsed % 12000 !== 0))
+        api.application.setProgress(elapsed / 1000);
     } else if (id === "interface") {
       const step = Math.min(3, Math.floor(elapsed / 6000));
       if (cue !== `interface-${step}` || force) {
@@ -138,7 +241,6 @@ export function initDeck(api) {
       }
     } else if (id === "experiments") {
       if (elapsed < 57000) {
-        api.paperViews.showExperimentVideo();
         mediaAtTime(force);
       } else {
         v.pause();
@@ -155,13 +257,19 @@ export function initDeck(api) {
     }
   }
 
-  function change(index, local = 0, historyMode = "replace") {
+  function change(
+    index,
+    local = 0,
+    historyMode = "replace",
+    previewApplication = true,
+  ) {
     page = Math.max(0, Math.min(pages.length - 1, index));
     elapsed = Math.max(0, Math.min(pages[page].duration, local));
     cue = "";
     mediaGeneration++;
     v.pause();
     api.connection.stop();
+    api.application?.pause();
     document.querySelectorAll(".slide").forEach((el) => {
       el.hidden = el.dataset.slide !== pages[page].id;
       el.classList.toggle("entering", !el.hidden);
@@ -190,7 +298,7 @@ export function initDeck(api) {
     if (pages[page].id === "geometry" && !explicitPause)
       window.geometryView?.resumeExploration();
     else window.geometryView?.pauseExploration();
-    sync(true);
+    sync(true, previewApplication);
     if (pages[page].id === "connection" && !explicitPause)
       api.connection.resume();
     updateControls();
@@ -241,8 +349,8 @@ export function initDeck(api) {
     if (pages[page].id === "geometry") window.geometryView?.resumeExploration();
   }
   $("#autoplay").onclick = () => (playing ? pause() : play());
-  $("#previous-page").onclick = () => go(page - 1);
-  $("#next-page").onclick = () => go(page + 1);
+  $("#previous-page").onclick = () => stepBy(-1);
+  $("#next-page").onclick = () => stepBy(1);
   $("#replay-page").onclick = () => {
     pause();
     change(page);
@@ -256,13 +364,14 @@ export function initDeck(api) {
       }),
   );
   $("#tour-seek").addEventListener("input", (e) => {
+    const requested = +e.target.value;
     pause();
-    const t = (+e.target.value / 1000) * total;
+    const t = (requested / 1000) * total;
     const index = offsets.findIndex(
       (start, i) =>
         t >= start && (i === pages.length - 1 || t < offsets[i + 1]),
     );
-    change(index, t - offsets[index]);
+    change(index, t - offsets[index], "replace", false);
   });
   // A user inspection pauses the tour instead of fighting its timeline.
   $("#stage").addEventListener(
@@ -284,17 +393,23 @@ export function initDeck(api) {
     true,
   );
   $("#stage").addEventListener("click", (e) => {
-    if (!e.isTrusted) return;
     const b = e.target.closest(
-      "[data-step],[data-stage],[data-case],[data-geometry-step],[data-result-view],[data-experiment-figure]",
+      "button[data-step],button[data-stage],button[data-case],button[data-geometry-step],button[data-application-step],button[data-result-view],button[data-experiment-figure]",
     );
     if (!b) return;
+    if (b.dataset.applicationStep !== undefined) {
+      elapsed = +b.dataset.applicationStep * 12000;
+      api.application.setStage(+b.dataset.applicationStep);
+    }
     if (b.dataset.step !== undefined) elapsed = +b.dataset.step * 8000;
     if (b.dataset.geometryStep !== undefined)
       elapsed = [0, 12000, 28000][+b.dataset.geometryStep];
     if (b.dataset.resultView !== undefined)
       elapsed = {
-        cohorts: 0,
+        cohorts:
+          ["navigation", "spatial", "second_source", "brightness"].indexOf(
+            $("#results-study").value,
+          ) * 7000,
         "prediction-controls": 28000,
         "learned-source": 38000,
       }[b.dataset.resultView];
@@ -348,11 +463,11 @@ export function initDeck(api) {
       return;
     if (["ArrowLeft", "PageUp"].includes(e.key)) {
       e.preventDefault();
-      go(page - 1);
+      stepBy(-1);
     }
     if (["ArrowRight", "PageDown"].includes(e.key)) {
       e.preventDefault();
-      go(page + 1);
+      stepBy(1);
     }
     if (e.code === "Space") {
       e.preventDefault();
@@ -395,7 +510,7 @@ export function initDeck(api) {
       if (Math.abs(wheel) > 105) {
         e.preventDefault();
         gestureUsed = true;
-        go(page + (wheel > 0 ? 1 : -1));
+        stepBy(wheel > 0 ? 1 : -1);
       }
     },
     { passive: false },
@@ -420,7 +535,7 @@ export function initDeck(api) {
       const dx = e.changedTouches[0].clientX - touch.x,
         dy = e.changedTouches[0].clientY - touch.y;
       touch = null;
-      if (Math.abs(dx) > 75 && Math.abs(dy) < 45) go(page + (dx < 0 ? 1 : -1));
+      if (Math.abs(dx) > 75 && Math.abs(dy) < 45) stepBy(dx < 0 ? 1 : -1);
     },
     { passive: true },
   );
@@ -446,7 +561,7 @@ export function initDeck(api) {
     pause,
     seek(index, local = 0) {
       pause();
-      change(index, local);
+      change(index, local, "replace", false);
     },
     get state() {
       return { page: pages[page].id, index: page, elapsed, playing };
@@ -455,6 +570,8 @@ export function initDeck(api) {
       return explicitPause;
     },
     pages,
+    stepBy,
+    stops,
   };
   const initial = pages.findIndex((p) => p.id === location.hash.slice(1));
   change(initial >= 0 ? initial : 0, 0, "replace");

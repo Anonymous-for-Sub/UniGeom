@@ -1,10 +1,12 @@
 # UniGeom project page
 
-A static six-chapter presentation, served from `docs/`: Overview, Shared geometry, Framework, Interface, Experiments and Results. Develop with `python3 -m http.server 8000 --directory docs` from the repository root. The downloadable review package includes a separately bundled offline entry.
+A static seven-chapter presentation, served from `docs/`: Overview, Shared geometry, Application, Framework, Interface, Experiments and Results. Develop with `python3 -m http.server 8000 --directory docs` from the repository root. The downloadable review package includes a separately bundled offline entry.
 
 ## A continuous explanation
 
 Shared geometry keeps the same two measured point clouds visible throughout all three stages. The first stage introduces their independent coordinates. The second highlights the selected observation and its actual ten-neighbor sets, with cross-space links for shared observation IDs. The third progressively adds a small set of shared anchor neighborhoods in those same clouds. Camera gestures, point selection and observation thumbnails remain available; changing the model pair interpolates the displayed positions while keeping observation identities. Full-cohort means are shown beside the spaces. No ranked-list or histogram replacement interrupts the spatial explanation.
+
+Between Shared geometry and Framework, an embedded application illustration follows a Go2 quadruped with an Airbot arm from the laboratory through a doorway to a warehouse receiving fixture. Its robot and environment geometry come from the supplied editable scene. Joint motion and camera movement are scripted to explain perception replacement and reuse of frozen dynamics; they are not recorded evaluations. Local assets and licenses are included.
 
 The framework is one native SVG, drawn with web text, paths, grids and flow animation. Its topology follows the manuscript: source history and goal, the shared learned interface, frozen dynamics, goal cost, residual spatial resampling and the paired-state calibration inset. Four stages highlight calibration, the bilinear base, residual correction and frozen rollout. Shape labels use 256 source tokens × 192 channels, consistent with the method equation. The separate interface chapter computes a teaching example of the spatial operation.
 
@@ -24,7 +26,7 @@ Manuscript evidence appears where it supports the explanation. Prediction contro
 
 ## Controls
 
-The shared tour lasts 4 minutes 7 seconds. Chapter buttons, previous/next, keyboard navigation and horizontal touch gestures navigate the presentation. Auto play, pause, replay and seek share one timeline; recordings pause its clock while buffering. Manual inspection pauses automatic progression. Enlarging a result keeps its caption and scope visible. A reduced-motion preference suppresses decorative motion while preserving meaningful state changes. On small screens, dense architecture detail scrolls within its own canvas.
+The shared tour lasts 4 minutes 43 seconds. The side chevrons, page keys and horizontal touch gestures follow chapter substeps in both directions before moving between chapters. Header tabs jump directly to a chapter. Auto play, pause, replay and seek share one timeline; recordings pause its clock while buffering. Manual inspection pauses automatic progression. Enlarging a result keeps its caption and scope visible. A reduced-motion preference suppresses decorative motion while preserving meaningful state changes. On small screens, dense architecture detail scrolls within its own canvas.
 
 The anonymous website omits author identities and affiliations. Its paper and social preview are independently prepared anonymous assets.
 

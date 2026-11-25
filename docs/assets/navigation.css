@@ -1,0 +1,191 @@
+/* Discrete chapter/substep navigation. Chevrons have no arrow shafts. */
+.edge-navigation {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 35;
+}
+.edge-step {
+  position: absolute;
+  top: calc(50% - 30px);
+  width: 42px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid #514963;
+  border-radius: 13px;
+  background: #191621e6;
+  color: #c8bcff;
+  box-shadow: 0 8px 24px #0003;
+  backdrop-filter: blur(10px);
+  pointer-events: auto;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    opacity 0.2s,
+    transform 0.2s;
+}
+.edge-step svg {
+  width: 18px;
+  height: 30px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#previous-page {
+  left: 9px;
+}
+#next-page {
+  right: 9px;
+}
+.edge-step:hover:not(:disabled) {
+  background: #302841;
+  border-color: #b6a5ee;
+  transform: scale(1.05);
+}
+.edge-step:focus-visible {
+  outline: 2px solid #cabfff;
+  outline-offset: 3px;
+}
+.edge-step:disabled {
+  opacity: 0.2;
+  cursor: default;
+  box-shadow: none;
+}
+.slide {
+  padding-left: 68px;
+  padding-right: 68px;
+}
+.controls-inner {
+  grid-template-columns: 1fr auto 1fr;
+}
+.playback {
+  grid-column: 2;
+}
+#connection-steps button,
+.interface-stage .stage-steps button,
+.evidence-steps button,
+#application-steps button {
+  font-size: 15px;
+  font-weight: 650;
+  text-align: center;
+  justify-content: center;
+  line-height: 1.45;
+}
+#connection-steps button span,
+.interface-stage .stage-steps button span,
+#application-steps button span {
+  font-size: 12px;
+  font-weight: 600;
+  display: block;
+  margin: 0 0 3px;
+  text-align: center;
+}
+@media (min-width: 1600px) {
+  #previous-page {
+    left: 17px;
+  }
+  #next-page {
+    right: 17px;
+  }
+}
+@media (max-width: 1100px) {
+  #connection-steps button,
+  .interface-stage .stage-steps button,
+  .evidence-steps button,
+  #application-steps button {
+    font-size: 14px;
+  }
+  .slide {
+    padding-left: 58px;
+    padding-right: 58px;
+  }
+  .edge-step {
+    width: 36px;
+    height: 60px;
+  }
+  #previous-page {
+    left: 7px;
+  }
+  #next-page {
+    right: 7px;
+  }
+}
+@media (max-width: 800px) {
+  .slide {
+    padding-left: 38px;
+    padding-right: 38px;
+  }
+  .edge-step {
+    width: 28px;
+    height: 54px;
+    border-radius: 9px;
+    top: calc(50% - 27px);
+  }
+  .edge-step svg {
+    width: 14px;
+    height: 26px;
+  }
+  #previous-page {
+    left: 4px;
+  }
+  #next-page {
+    right: 4px;
+  }
+  .controls-inner {
+    display: flex;
+    justify-content: center;
+  }
+  .page-position {
+    display: none;
+  }
+  #connection-steps button,
+  .interface-stage .stage-steps button,
+  .evidence-steps button,
+  #application-steps button {
+    font-size: 14px;
+    padding: 10px 6px;
+    white-space: normal;
+  }
+  .evidence-steps button {
+    min-width: 110px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .edge-step {
+    transition: none;
+  }
+}
+@media (min-width: 801px) and (max-height: 820px) {
+  #slide-results .results-stage {
+    gap: 16px;
+  }
+  #slide-results #results-live .stage-top {
+    margin-bottom: 16px;
+  }
+}
+@media (max-width: 800px) {
+  #application-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    overflow: visible;
+  }
+  #application-steps button {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 9px 4px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  #application-steps button span {
+    margin: 0 0 5px;
+  }
+}

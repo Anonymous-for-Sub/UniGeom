@@ -1,0 +1,12 @@
+The scene illustrates the transfer of a visual interface between a laboratory
+and a warehouse. Its animation is an application illustration.
+
+The environment geometry is adapted from the UniGeom five-pose capability
+bridge Blender scene. The robot uses the Go2 quadruped and Airbot arm meshes
+from its MuJoCo model. Geometry was simplified and quantized for web display.
+Joint transforms, original arm poses, finger pad positions, and an additional
+placement and withdrawal pose are used for the animated figure.
+The robot mesh license is reproduced in ROBOT-APACHE-2.0.txt.
+
+three-math.js contains the tree-shaken Matrix4, Vector3 and Quaternion classes
+from Three.js r170. See THREE-MIT.txt for the full license.

@@ -24,11 +24,13 @@
       property="og:image"
     />
     <link href="assets/favicon.svg" rel="icon" type="image/svg+xml" />
-    <link href="assets/site.css?v=20261126e" rel="stylesheet" />
-    <script src="assets/site.js?v=20261126e" type="module"></script>
+    <link href="assets/site.css?v=20261126f" rel="stylesheet" />
+    <script src="assets/site.js?v=20261126f" type="module"></script>
     <meta content="dark" name="color-scheme" />
-    <link href="assets/framework.css?v=20261126e" rel="stylesheet" />
-    <link href="assets/integrated.css?v=20261126e" rel="stylesheet" />
+    <link href="assets/framework.css?v=20261126f" rel="stylesheet" />
+    <link href="assets/integrated.css?v=20261126f" rel="stylesheet" />
+    <link href="assets/application.css?v=20261126f" rel="stylesheet" />
+    <link href="assets/navigation.css?v=20261126f" rel="stylesheet" />
   </head>
   <body>
     <a class="skip" href="#stage">Skip to presentation</a>
@@ -52,6 +54,15 @@
           tabindex="-1"
         >
           Shared geometry</button
+        ><button
+          aria-controls="slide-application"
+          aria-selected="false"
+          data-page="application"
+          id="tab-application"
+          role="tab"
+          tabindex="-1"
+        >
+          Application</button
         ><button
           aria-controls="slide-connection"
           aria-selected="false"
@@ -244,6 +255,52 @@
             Drag to rotate · select a point to inspect its neighborhood
           </p>
           <p class="data-error" hidden="" id="geometry-error"></p>
+        </div>
+      </section>
+      <section
+        aria-labelledby="tab-application"
+        class="slide chapter"
+        data-slide="application"
+        hidden=""
+        id="slide-application"
+        role="tabpanel"
+      >
+        <aside class="chapter-copy">
+          <h2 id="application-heading">
+            Change perception.<br />Keep learned dynamics.
+          </h2>
+          <p id="application-description">
+            A robot moves from a familiar workspace into a different visual
+            environment. UniGeom asks whether a new perception component can
+            reuse its existing world model.
+          </p>
+          <p class="footnote">Application illustration</p>
+        </aside>
+        <div class="chapter-stage application-stage">
+          <div
+            aria-label="Application steps"
+            class="stage-steps"
+            id="application-steps"
+            role="group"
+          >
+            <button
+              aria-pressed="true"
+              class="selected"
+              data-application-step="0"
+            >
+              <span>01</span> Start with learned dynamics
+            </button>
+            <button aria-pressed="false" data-application-step="1">
+              <span>02</span> Connect new perception
+            </button>
+            <button aria-pressed="false" data-application-step="2">
+              <span>03</span> Reuse for manipulation
+            </button>
+          </div>
+          <div
+            aria-label="Animated Go2 quadruped with Airbot arm moving from a laboratory into a warehouse"
+            id="application-scene"
+          ></div>
         </div>
       </section>
       <section
@@ -552,6 +609,28 @@
         </div>
       </section>
     </main>
+    <nav aria-label="Presentation steps" class="edge-navigation">
+      <button
+        aria-label="Previous step"
+        class="edge-step"
+        id="previous-page"
+        title="Previous step"
+      >
+        <svg aria-hidden="true" viewbox="0 0 24 36">
+          <path d="M17 7 L6 18 L17 29"></path>
+        </svg>
+      </button>
+      <button
+        aria-label="Next step"
+        class="edge-step"
+        id="next-page"
+        title="Next step"
+      >
+        <svg aria-hidden="true" viewbox="0 0 24 36">
+          <path d="M7 7 L18 18 L7 29"></path>
+        </svg>
+      </button>
+    </nav>
     <footer class="deck-controls">
       <div class="tour-progress">
         <input
@@ -566,7 +645,7 @@
       </div>
       <div class="controls-inner">
         <div class="page-position">
-          <span id="page-count">01 / 06</span
+          <span id="page-count">01 / 07</span
           ><span id="page-name">Overview</span>
         </div>
         <div class="playback">
@@ -579,17 +658,6 @@
             title="Replay current page"
           >
             Replay
-          </button>
-        </div>
-        <div class="page-arrows">
-          <button
-            aria-label="Previous page"
-            class="page-arrow"
-            id="previous-page"
-          >
-            Previous</button
-          ><button aria-label="Next page" class="page-arrow" id="next-page">
-            <span id="next-page-label">Next: Shared geometry</span>
           </button>
         </div>
       </div>
