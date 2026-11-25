@@ -1,5 +1,5 @@
 import { Matrix4, Quaternion, Vector3 } from "./three-math.js";
-import { unpackMesh } from "./render.js?v=20261126h";
+import { unpackMesh } from "./render.js?v=20261126i";
 
 const palette = {
   "Satin laboratory epoxy": "#d6d5c9",
@@ -66,21 +66,30 @@ function baseX(t) {
   if (t < 29) return 2.2 - 0.22 * ((29 - t) / 2) ** 2;
   return 2.2;
 }
+// Fold the load in before the doorway, then raise, align, lower and withdraw.
+// Times use the 39-second source clock; app.js retains the 26-second loop.
 const armTimeline = [
   [0, 0],
-  [10, 0],
-  [15, 1],
-  [19, 2],
-  [24, 3],
+  [7, 0],
+  [11, 1],
+  [20, 1],
+  [24, 2],
   [27, 3],
-  [29.8, 4],
-  [32.5, 5],
-  [33.8, 5],
-  [36, 6],
+  [29.7, 4],
+  [32.35, 5],
+  [33.7, 5],
+  [35.4, 6],
+  [37.6, 7],
 ];
+const placement = {
+  contactTime: 32.35,
+  releaseTime: 32.65,
+  openTime: 33.55,
+  supportHeight: 0.548583984375,
+};
 function armAngles(rig, t) {
   const end = armTimeline.findIndex(([time]) => time >= t);
-  if (end <= 0) return rig.arm[end === 0 ? 0 : 6];
+  if (end <= 0) return rig.arm[end === 0 ? 0 : armTimeline.at(-1)[1]];
   const [ta, ia] = armTimeline[end - 1],
     [tb, ib] = armTimeline[end],
     w = ramp(t, ta, tb);
@@ -221,9 +230,10 @@ const makeItem = (mesh, hex) => ({
 });
 
 export function buildScene(meshes, rig) {
-  const objects = Object.entries(meshes.room).map(([material, source]) =>
-    makeItem(unpackMesh(source), palette[material]),
-  );
+  const objects = Object.entries(meshes.room).map(([material, source]) => ({
+    ...makeItem(unpackMesh(source), palette[material]),
+    surface: material,
+  }));
   const geometry = Object.fromEntries(
     Object.entries(meshes.robot).map(([key, m]) => [key, unpackMesh(m)]),
   );
@@ -241,7 +251,7 @@ export function buildScene(meshes, rig) {
   });
   const part = makeItem(cylinder(0.0115, 0.055), "#ccd5df");
   const band = makeItem(cylinder(0.012, 0.016), "#8af0d9");
-  const shadows = Array.from({ length: 8 }, () => makeItem(disc, "#000000"));
+  const shadows = Array.from({ length: 24 }, () => makeItem(disc, "#000000"));
   objects.push(...shadows, part, band);
   const left = vector(rig.pad.p),
     right = vector(rig.otherPad.p);
@@ -252,6 +262,13 @@ export function buildScene(meshes, rig) {
   const delta = new Quaternion(),
     factor = new Vector3();
   const placed = new Matrix4();
+  // A side grasp: cylinder axis follows the hand's X axis. Grip 7 mm above
+  // its center, leaving the fingertips above the flat receiving surface.
+  const graspOffset = new Matrix4().compose(
+    new Vector3(0.007, 0, 0),
+    new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2),
+    units,
+  );
   function pose(t) {
     const x = baseX(t),
       distance = x + 3.28;
@@ -280,18 +297,21 @@ export function buildScene(meshes, rig) {
       else if (b.joint)
         qa.multiply(delta.setFromAxisAngle(b.axis, joints[b.joint.name] || 0));
       if (i === rig.pad.b || i === rig.otherPad.b)
-        pos.y += Math.sign(pos.y) * 0.013 * ramp(t, 32.65, 33.55);
+        pos.y +=
+          Math.sign(pos.y) *
+          0.013 *
+          ramp(t, placement.releaseTime, placement.openTime);
       local.compose(pos, qa, units);
       b.world.multiplyMatrices(links[b.parent].world, local);
     }
     for (const { item, body, offset } of robot)
       item.transform.multiplyMatrices(links[body].world, offset);
-    if (t <= 33.2) {
+    if (t <= placement.releaseTime) {
       const hand = links[rig.pad.b].world;
       pos.copy(left).applyMatrix4(hand);
       pos.lerp(p2.copy(right).applyMatrix4(links[rig.otherPad.b].world), 0.5);
       qa.setFromRotationMatrix(hand);
-      part.transform.compose(pos, qa, units);
+      part.transform.compose(pos, qa, units).multiply(graspOffset);
     } else part.transform.copy(placed);
     band.transform.copy(part.transform);
     shadows.forEach((item, j) => {
@@ -299,10 +319,10 @@ export function buildScene(meshes, rig) {
       pos.set(x - 0.02, -0.53, 0.009 + f * 0.0008);
       factor.set(0.51 - 0.19 * f, 0.25 - 0.095 * f, 1);
       item.transform.compose(pos, identityQuaternion, factor);
-      item.opacity = 0.025 + 0.06 * f * f;
+      item.opacity = (0.025 + 0.06 * f * f) * (8 / shadows.length);
     });
   }
-  pose(33.18);
+  pose(placement.contactTime);
   placed.copy(part.transform);
   const projection = new Matrix4(),
     cameraWorld = new Matrix4(),
@@ -341,6 +361,19 @@ export function buildScene(meshes, rig) {
     view.multiplyMatrices(projection, local.copy(cameraWorld).invert());
     return { view, objects };
   }
-  return { frame };
+  // Read-only snapshots allow CPU geometry checks without coupling the camera.
+  function inspect(t) {
+    pose(t);
+    return {
+      armAngles: armAngles(rig, t).slice(),
+      partTransform: Array.from(part.transform.elements),
+      linkTransforms: links.map((link) => Array.from(link.world.elements)),
+      gripperOpening:
+        0.013 * ramp(t, placement.releaseTime, placement.openTime),
+      released: t > placement.releaseTime,
+      supportHeight: placement.supportHeight,
+    };
+  }
+  return { frame, inspect };
 }
 const identityQuaternion = new Quaternion();

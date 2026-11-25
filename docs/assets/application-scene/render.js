@@ -18,25 +18,127 @@ export function unpackMesh(source) {
   return { positions, normals, shade, indices: decode(source.i, Uint16Array) };
 }
 
+// Seamless, deterministic material tiles; shared by WebGL and the CPU fallback.
+// World-space mapping keeps grain attached to surfaces during camera movement.
+const SIZE = 128;
+const surfaceCache = new Map();
+function surfaceTexture(name = "") {
+  let kind = "",
+    scale = 1;
+  if (name.includes("concrete")) {
+    kind = "concrete";
+    scale = 1.4;
+  } else if (name.includes("epoxy")) {
+    kind = "epoxy";
+    scale = 2.4;
+  } else if (name.includes("white cabinet")) {
+    kind = "laminate";
+    scale = 2.5;
+  } else if (name.includes("aluminium") || name.includes("steel")) {
+    kind = "metal";
+    scale = 4;
+  } else if (name.includes("cardboard")) {
+    kind = "paper";
+    scale = 3;
+  } else if (name.includes("wood")) {
+    kind = "wood";
+    scale = 2;
+  } else if (name.includes("plaster")) {
+    kind = "plaster";
+    scale = 2;
+  }
+  if (surfaceCache.has(kind)) return surfaceCache.get(kind);
+  const data = new Uint8Array(SIZE * SIZE);
+  let seed = 5719;
+  const rand = () => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  const grids = [4, 16, 64].map((n) => ({
+    n,
+    a: Float32Array.from({ length: n * n }, () => rand() * 2 - 1),
+  }));
+  const noise = (x, y, g) => {
+    const fx = (x * g.n) / SIZE,
+      fy = (y * g.n) / SIZE,
+      ix = Math.floor(fx),
+      iy = Math.floor(fy);
+    let u = fx - ix,
+      v = fy - iy;
+    u = u * u * (3 - 2 * u);
+    v = v * v * (3 - 2 * v);
+    const at = (a, b) => g.a[(b % g.n) * g.n + (a % g.n)];
+    return (
+      (at(ix, iy) * (1 - u) + at(ix + 1, iy) * u) * (1 - v) +
+      (at(ix, iy + 1) * (1 - u) + at(ix + 1, iy + 1) * u) * v
+    );
+  };
+  for (let y = 0; y < SIZE; y++)
+    for (let x = 0; x < SIZE; x++) {
+      const broad = noise(x, y, grids[0]),
+        mid = noise(x, y, grids[1]),
+        fine = noise(x, y, grids[2]),
+        grit = rand() * 2 - 1;
+      let v = 1;
+      if (kind === "concrete")
+        v += 0.085 * broad + 0.045 * mid + 0.045 * fine + 0.027 * grit;
+      if (kind === "epoxy") v += 0.026 * broad + 0.022 * fine + 0.018 * grit;
+      if (kind === "laminate")
+        v +=
+          0.018 * broad +
+          0.018 * fine +
+          0.012 * Math.sin((y * Math.PI * 90) / SIZE + mid * 0.6);
+      if (kind === "metal")
+        v +=
+          0.013 * mid +
+          0.026 * Math.sin((y * Math.PI * 110) / SIZE + fine * 0.45) +
+          0.014 * grit;
+      if (kind === "paper")
+        v +=
+          0.04 * mid +
+          0.045 * fine +
+          0.018 * Math.sin((x * Math.PI * 62) / SIZE);
+      if (kind === "wood")
+        v +=
+          0.045 * broad +
+          0.055 * Math.sin((y * Math.PI * 20) / SIZE + broad * 2.4) +
+          0.018 * grit;
+      if (kind === "plaster") v += 0.025 * broad + 0.028 * fine + 0.018 * grit;
+      data[y * SIZE + x] = Math.round(v * 128);
+    }
+  const result = { data, scale, active: !!kind };
+  surfaceCache.set(kind, result);
+  return result;
+}
+
 const vertex = `
 attribute vec3 p, n;
 attribute float occlusion;
 uniform mat4 camera, model;
 uniform vec3 color;
 varying vec3 lit;
+varying vec2 surfaceUV;
 void main() {
   vec3 normal = normalize(mat3(model) * n);
   float key = max(0.0, dot(normal, vec3(-.370, -.566, .736)));
   float fill = max(0.0, dot(normal, vec3(.702, .500, .506)));
   float rim = pow(max(0.0, dot(normal, vec3(.769, .513, .381))), 6.0);
   vec3 world = (model * vec4(p, 1.0)).xyz;
+  vec3 an = abs(normal);
+  surfaceUV = an.z >= an.x && an.z >= an.y ? world.xy : (an.x >= an.y ? world.yz : world.xz);
   float lab = 1.0 - smoothstep(-.3, .3, world.x);
   float ambient = mix(.40,.72,lab);
   lit = (color * (ambient + mix(.50,.35,lab) * key + .10 * fill) + vec3(.042,.044,.066) * rim) * occlusion;
   gl_Position = camera * model * vec4(p, 1.0);
 }`;
-const fragment = `precision mediump float; varying vec3 lit; uniform float opacity;
-void main() { gl_FragColor = vec4(lit, opacity); }`;
+const fragment = `precision mediump float;
+varying vec3 lit; varying vec2 surfaceUV;
+uniform float opacity, surfaceScale;
+uniform sampler2D grain;
+void main() {
+  float textureShade = texture2D(grain, surfaceUV * surfaceScale).r * (255.0 / 128.0);
+  gl_FragColor = vec4(lit * textureShade, opacity);
+}`;
 
 function glRenderer(gl) {
   const shaders = [gl.VERTEX_SHADER, gl.FRAGMENT_SHADER].map((type, i) => {
@@ -61,6 +163,39 @@ function glRenderer(gl) {
   const model = gl.getUniformLocation(program, "model"),
     color = gl.getUniformLocation(program, "color");
   const alpha = gl.getUniformLocation(program, "opacity");
+  const surfaceScale = gl.getUniformLocation(program, "surfaceScale");
+  gl.uniform1i(gl.getUniformLocation(program, "grain"), 0);
+  const textures = new Map();
+  function bindSurface(name) {
+    const t = surfaceTexture(name);
+    if (!textures.has(t)) {
+      const id = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, id);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.LUMINANCE,
+        SIZE,
+        SIZE,
+        0,
+        gl.LUMINANCE,
+        gl.UNSIGNED_BYTE,
+        t.data,
+      );
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(
+        gl.TEXTURE_2D,
+        gl.TEXTURE_MIN_FILTER,
+        gl.LINEAR_MIPMAP_LINEAR,
+      );
+      gl.generateMipmap(gl.TEXTURE_2D);
+      textures.set(t, id);
+    }
+    gl.bindTexture(gl.TEXTURE_2D, textures.get(t));
+    gl.uniform1f(surfaceScale, t.scale);
+  }
   gl.enable(gl.BLEND);
   gl.blendFuncSeparate(
     gl.SRC_ALPHA,
@@ -86,7 +221,7 @@ function glRenderer(gl) {
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       gl.uniformMatrix4fv(camera, false, view.elements);
-      for (const { mesh, transform, rgb, opacity = 1 } of items) {
+      for (const { mesh, transform, rgb, opacity = 1, surface } of items) {
         if (!meshes.has(mesh))
           meshes.set(mesh, [
             buffer(mesh.positions, gl.ARRAY_BUFFER),
@@ -111,6 +246,7 @@ function glRenderer(gl) {
         gl.uniformMatrix4fv(model, false, transform.elements);
         gl.uniform3fv(color, rgb);
         gl.uniform1f(alpha, opacity);
+        bindSurface(surface);
         gl.drawElements(
           gl.TRIANGLES,
           mesh.indices.length,
@@ -122,6 +258,7 @@ function glRenderer(gl) {
     dispose() {
       for (const buffers of meshes.values())
         buffers.forEach((id) => gl.deleteBuffer(id));
+      for (const id of textures.values()) gl.deleteTexture(id);
       gl.deleteProgram(program);
     },
   };
@@ -146,15 +283,16 @@ function canvasRenderer(canvas) {
       depth.fill(Infinity);
       pixels.fill(0);
       const vp = view.elements;
-      for (const { mesh, transform, rgb, opacity = 1 } of items) {
+      for (const { mesh, transform, rgb, opacity = 1, surface } of items) {
         const m = transform.elements;
+        const tile = surfaceTexture(surface);
         const { positions, normals, indices } = mesh;
         const count = positions.length / 3;
-        if (count * 5 > projected.length)
-          projected = new Float32Array(count * 5);
+        if (count * 7 > projected.length)
+          projected = new Float32Array(count * 7);
         for (let i = 0; i < count; i++) {
           const a = i * 3,
-            b = i * 5;
+            b = i * 7;
           const x = positions[a],
             y = positions[a + 1],
             z = positions[a + 2];
@@ -172,6 +310,15 @@ function canvasRenderer(canvas) {
           const nx = m[0] * u + m[4] * v + m[8] * w,
             ny = m[1] * u + m[5] * v + m[9] * w,
             nz = m[2] * u + m[6] * v + m[10] * w;
+          const axn = Math.abs(nx),
+            ayn = Math.abs(ny),
+            azn = Math.abs(nz);
+          projected[b + 5] =
+            (azn >= axn && azn >= ayn ? wx : axn >= ayn ? wy : wx) *
+            tile.scale *
+            SIZE;
+          projected[b + 6] =
+            (azn >= axn && azn >= ayn ? wy : wz) * tile.scale * SIZE;
           const shade = mesh.shade ? mesh.shade[i] / 255 : 1;
           const edge = Math.max(0, Math.min(1, (wx + 0.3) / 0.6));
           const lab = 1 - edge * edge * (3 - 2 * edge);
@@ -186,9 +333,9 @@ function canvasRenderer(canvas) {
             shade * Math.max(0, 0.769 * nx + 0.513 * ny + 0.381 * nz) ** 6;
         }
         for (let k = 0; k < indices.length; k += 3) {
-          const a = indices[k] * 5,
-            b = indices[k + 1] * 5,
-            c = indices[k + 2] * 5;
+          const a = indices[k] * 7,
+            b = indices[k + 1] * 7,
+            c = indices[k + 2] * 7;
           const ax = projected[a],
             ay = projected[a + 1],
             bx = projected[b],
@@ -215,6 +362,12 @@ function canvasRenderer(canvas) {
           const ra = projected[a + 4],
             rb = projected[b + 4] - ra,
             rc = projected[c + 4] - ra;
+          const tx = projected[a + 5],
+            ty = projected[a + 6],
+            txb = projected[b + 5] - tx,
+            txc = projected[c + 5] - tx,
+            tyb = projected[b + 6] - ty,
+            tyc = projected[c + 6] - ty;
           for (let py = y0; py <= y1; py++) {
             const dy = py + 0.5 - ay,
               dx = x0 + 0.5 - ax;
@@ -226,8 +379,14 @@ function canvasRenderer(canvas) {
                 j = py * width + px;
               if (z >= depth[j]) continue;
               depth[j] = z;
-              const light = la + u * lb + v * lc,
-                rim = ra + u * rb + v * rc;
+              const grain = tile.active
+                ? tile.data[
+                    ((Math.floor(ty + u * tyb + v * tyc) & 127) << 7) +
+                      (Math.floor(tx + u * txb + v * txc) & 127)
+                  ] / 128
+                : 1;
+              const light = (la + u * lb + v * lc) * grain,
+                rim = (ra + u * rb + v * rc) * grain;
               let red = Math.min(
                 255,
                 Math.round(255 * (rgb[0] * light + 0.042 * rim)),
