@@ -1,0 +1,91 @@
+/* SVG computation views share the page palette; motion follows the deck clock. */
+#interface-diagram .interface-panel {
+  fill: #191820;
+  stroke: #363141;
+}
+#interface-diagram .interface-operation {
+  fill: #c8c2ff;
+  font:
+    600 17px Manrope,
+    Arial,
+    sans-serif;
+}
+#interface-diagram .interface-phase {
+  fill: #e2dff1;
+  font:
+    600 15px Manrope,
+    Arial,
+    sans-serif;
+}
+#interface-diagram .interface-readout {
+  fill: #e9e6f6;
+  font:
+    500 17px Manrope,
+    Arial,
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+#interface-diagram .interface-metric {
+  fill: #ccc7ef;
+  font:
+    500 14px Manrope,
+    Arial,
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+#interface-diagram .interface-tiny {
+  fill: #a9a2ba;
+  font:
+    400 12px Manrope,
+    Arial,
+    sans-serif;
+}
+#interface-diagram .interface-note {
+  fill: #a9a2ba;
+  font:
+    400 12px Manrope,
+    Arial,
+    sans-serif;
+}
+#interface-diagram .interface-selection {
+  pointer-events: none;
+}
+#interface-diagram .interface-routes {
+  pointer-events: none;
+}
+#interface-diagram .token {
+  transition: none;
+}
+#interface-diagram:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+@media (max-width: 800px) {
+  #interface-diagram .interface-operation {
+    font-size: 13px;
+  }
+  #interface-diagram .interface-readout {
+    font-size: 13px;
+  }
+  #interface-diagram .interface-metric {
+    font-size: 10px;
+  }
+  #interface-diagram .interface-tiny {
+    font-size: 9px;
+  }
+  #interface-diagram .interface-note {
+    font-size: 10px;
+  }
+}
+
+@media (min-width: 801px) {
+  .interface-stage .diagram-scroll svg {
+    max-height: min(52vh, calc(100dvh - 390px));
+  }
+}
+/* Decorative packets must never intercept target-token inspection, even when
+   fully transparent or frozen at the end of a reduced-motion sequence. */
+#interface-diagram [aria-hidden="true"] {
+  pointer-events: none;
+}

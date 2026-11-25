@@ -126,6 +126,7 @@ export function initDeck(api) {
     if (pages[page].id === "overview") window.geometryView?.resumeHero();
     if (pages[page].id === "geometry") window.geometryView?.resumeExploration();
     if (pages[page].id === "connection") api.connection.resume();
+    if (pages[page].id === "interface") api.spatialInterface.resume?.();
   }
   function stepBy(direction) {
     const target = neighbor(direction);
@@ -149,6 +150,7 @@ export function initDeck(api) {
     raf = null;
     api.connection.stop();
     api.application?.pause();
+    api.spatialInterface.stop?.();
     v.pause();
     document.querySelectorAll("svg").forEach((el) => el.pauseAnimations?.());
     window.geometryView?.pauseHero();
@@ -186,7 +188,7 @@ export function initDeck(api) {
     else if (changed || force)
       v.addEventListener("loadeddata", apply, { once: true });
   }
-  function sync(force = false, previewApplication = false) {
+  function sync(force = false, previewScenes = false) {
     const id = pages[page].id;
     if (id === "connection") {
       const step = Math.min(3, Math.floor(elapsed / 8000));
@@ -196,15 +198,19 @@ export function initDeck(api) {
       }
     } else if (id === "application") {
       if (cue !== "application" || force) {
-        if (previewApplication && !playing)
-          api.application.playFrom(elapsed / 1000);
+        if (previewScenes && !playing) api.application.playFrom(elapsed / 1000);
         cue = "application";
       }
-      if (playing || !previewApplication)
+      if (playing || !previewScenes)
         api.application.setProgress(elapsed / 1000);
     } else if (id === "interface") {
       const step = Math.min(3, Math.floor(elapsed / 6000));
-      if (cue !== `interface-${step}` || force) {
+      // Compute motion shares the tour clock. Manual navigation previews a
+      // stage locally; an explicit seek renders a deterministic frozen frame.
+      if (playing || !previewScenes) {
+        api.spatialInterface.setProgress?.(elapsed / 1000);
+        cue = `interface-${step}`;
+      } else if (cue !== `interface-${step}` || force) {
         api.spatialInterface.setStage(step);
         cue = `interface-${step}`;
       }
@@ -257,7 +263,7 @@ export function initDeck(api) {
     index,
     local = 0,
     historyMode = "replace",
-    previewApplication = true,
+    previewScenes = true,
   ) {
     page = Math.max(0, Math.min(pages.length - 1, index));
     elapsed = Math.max(0, Math.min(pages[page].duration, local));
@@ -266,6 +272,7 @@ export function initDeck(api) {
     v.pause();
     api.connection.stop();
     api.application?.pause();
+    api.spatialInterface.stop?.();
     document.querySelectorAll(".slide").forEach((el) => {
       el.hidden = el.dataset.slide !== pages[page].id;
       el.classList.toggle("entering", !el.hidden);
@@ -294,7 +301,7 @@ export function initDeck(api) {
     if (pages[page].id === "geometry" && !explicitPause)
       window.geometryView?.resumeExploration();
     else window.geometryView?.pauseExploration();
-    sync(true, previewApplication);
+    sync(true, previewScenes);
     if (pages[page].id === "connection" && !explicitPause)
       api.connection.resume();
     updateControls();
@@ -342,6 +349,7 @@ export function initDeck(api) {
     explicitPause = false;
     if (page === 0) window.geometryView?.resumeHero();
     if (pages[page].id === "connection") api.connection.resume();
+    if (pages[page].id === "interface") api.spatialInterface.resume?.();
     if (pages[page].id === "geometry") window.geometryView?.resumeExploration();
   }
   $("#autoplay").onclick = () => (playing ? pause() : play());

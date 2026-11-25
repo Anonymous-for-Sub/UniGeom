@@ -1,5 +1,5 @@
-import { buildScene } from "./application-scene/scene.js?v=20261126i";
-import { createRenderer } from "./application-scene/render.js?v=20261126i";
+import { buildScene } from "./application-scene/scene.js?v=20261126j";
+import { createRenderer } from "./application-scene/render.js?v=20261126j";
 
 const stages = [
   {
@@ -228,10 +228,10 @@ export function initApplication() {
   select(0);
   root.dataset.ready = "loading";
   const ready = Promise.all([
-    fetch("assets/application-scene/meshes.json?v=20261126i").then((res) =>
+    fetch("assets/application-scene/meshes.json?v=20261126j").then((res) =>
       res.json(),
     ),
-    fetch("assets/application-scene/rig.json?v=20261126i").then((res) =>
+    fetch("assets/application-scene/rig.json?v=20261126j").then((res) =>
       res.json(),
     ),
   ])

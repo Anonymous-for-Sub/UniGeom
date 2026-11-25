@@ -1,5 +1,5 @@
 import { Matrix4, Quaternion, Vector3 } from "./three-math.js";
-import { unpackMesh } from "./render.js?v=20261126i";
+import { unpackMesh } from "./render.js?v=20261126j";
 
 const palette = {
   "Satin laboratory epoxy": "#d6d5c9",

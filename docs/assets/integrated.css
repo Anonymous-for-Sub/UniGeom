@@ -577,3 +577,70 @@
     height: 245px;
   }
 }
+
+/* Enter in reading order; keep the visual workbench stable while it operates. */
+@keyframes content-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes workbench-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(7px) scale(0.993);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .slide.entering {
+    animation: none;
+  }
+  .slide.entering .chapter-copy > h2,
+  .slide.entering .hero-copy > h1 {
+    animation: content-arrive 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .slide.entering .chapter-copy > p,
+  .slide.entering .hero-copy > p {
+    animation: content-arrive 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.07s both;
+  }
+  .slide.entering .chapter-copy > .detail-copy,
+  .slide.entering .chapter-copy > .field,
+  .slide.entering .experiment-list {
+    animation: content-arrive 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both;
+  }
+  .slide.entering .chapter-stage > .stage-steps,
+  .slide.entering #connection-steps {
+    animation: content-arrive 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+  }
+  .slide.entering .chapter-stage > .diagram-scroll,
+  .slide.entering #framework-diagram,
+  .slide.entering #results-live,
+  .slide.entering .experiment-player {
+    animation: workbench-arrive 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+  }
+  .slide.entering .chapter-stage > .equation,
+  .slide.entering .chapter-stage > .stage-hint {
+    animation: content-arrive 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+  }
+  .slide.entering .app-caption {
+    animation: content-arrive 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+  }
+  .stage-steps button {
+    transition:
+      background-color 0.24s,
+      border-color 0.24s,
+      color 0.24s,
+      box-shadow 0.24s;
+  }
+  .stage-steps button.selected {
+    box-shadow: inset 0 -2px 0 #a29cff55;
+  }
+}
