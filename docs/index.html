@@ -1,266 +1,641 @@
-<!DOCTYPE html>
+<!doctype html>
 
 <html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>UniGeom — Shared Geometry for World Models</title>
-<meta content="Connect independently trained perception to frozen world models. Explore shared representation geometry, lightweight interfaces, and recorded prediction and control experiments." name="description"/>
-<meta content="#101014" name="theme-color"/>
-<meta content="UniGeom: Shared Geometry for World Models" property="og:title"/>
-<meta content="From shared representations to reusable prediction and control." property="og:description"/>
-<meta content="website" property="og:type"/>
-<meta content="https://anonymous-for-sub.github.io/UniGeom/assets/images/social.png" property="og:image"/>
-<link href="assets/favicon.svg" rel="icon" type="image/svg+xml"/>
-<link href="assets/site.css?v=20261126" rel="stylesheet"/>
-<script src="assets/site.js?v=20261126" type="module"></script>
-<meta content="dark" name="color-scheme"/>
-</head>
-<body>
-<a class="skip" href="#stage">Skip to presentation</a>
-<header class="site-header">
-<nav aria-label="Presentation pages" class="page-tabs" role="tablist">
-<button aria-controls="slide-overview" aria-selected="true" data-page="overview" id="tab-overview" role="tab" tabindex="0">
-          Overview</button><button aria-controls="slide-geometry" aria-selected="false" data-page="geometry" id="tab-geometry" role="tab" tabindex="-1">
-          Shared geometry</button><button aria-controls="slide-connection" aria-selected="false" data-page="connection" id="tab-connection" role="tab" tabindex="-1">
-          Connection</button><button aria-controls="slide-interface" aria-selected="false" data-page="interface" id="tab-interface" role="tab" tabindex="-1">
-          Interface</button><button aria-controls="slide-results" aria-selected="false" data-page="results" id="tab-results" role="tab" tabindex="-1">
-          Results</button><button aria-controls="slide-experiments" aria-selected="false" data-page="experiments" id="tab-experiments" role="tab" tabindex="-1">
-          Experiments</button><button aria-controls="slide-paper" aria-selected="false" data-page="paper" id="tab-paper" role="tab" tabindex="-1">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <title>UniGeom — Shared Geometry for World Models</title>
+    <meta
+      content="Connect independently trained perception to frozen world models. Explore shared representation geometry, lightweight interfaces, and recorded prediction and control experiments."
+      name="description"
+    />
+    <meta content="#101014" name="theme-color" />
+    <meta
+      content="UniGeom: Shared Geometry for World Models"
+      property="og:title"
+    />
+    <meta
+      content="From shared representations to reusable prediction and control."
+      property="og:description"
+    />
+    <meta content="website" property="og:type" />
+    <meta
+      content="https://anonymous-for-sub.github.io/UniGeom/assets/images/social.png"
+      property="og:image"
+    />
+    <link href="assets/favicon.svg" rel="icon" type="image/svg+xml" />
+    <link href="assets/site.css?v=20261126b" rel="stylesheet" />
+    <script src="assets/site.js?v=20261126b" type="module"></script>
+    <meta content="dark" name="color-scheme" />
+  </head>
+  <body>
+    <a class="skip" href="#stage">Skip to presentation</a>
+    <header class="site-header">
+      <nav aria-label="Presentation pages" class="page-tabs" role="tablist">
+        <button
+          aria-controls="slide-overview"
+          aria-selected="true"
+          data-page="overview"
+          id="tab-overview"
+          role="tab"
+          tabindex="0"
+        >
+          Overview</button
+        ><button
+          aria-controls="slide-geometry"
+          aria-selected="false"
+          data-page="geometry"
+          id="tab-geometry"
+          role="tab"
+          tabindex="-1"
+        >
+          Shared geometry</button
+        ><button
+          aria-controls="slide-connection"
+          aria-selected="false"
+          data-page="connection"
+          id="tab-connection"
+          role="tab"
+          tabindex="-1"
+        >
+          Framework</button
+        ><button
+          aria-controls="slide-interface"
+          aria-selected="false"
+          data-page="interface"
+          id="tab-interface"
+          role="tab"
+          tabindex="-1"
+        >
+          Interface</button
+        ><button
+          aria-controls="slide-results"
+          aria-selected="false"
+          data-page="results"
+          id="tab-results"
+          role="tab"
+          tabindex="-1"
+        >
+          Results</button
+        ><button
+          aria-controls="slide-experiments"
+          aria-selected="false"
+          data-page="experiments"
+          id="tab-experiments"
+          role="tab"
+          tabindex="-1"
+        >
+          Experiments</button
+        ><button
+          aria-controls="slide-figures"
+          aria-selected="false"
+          data-page="figures"
+          id="tab-figures"
+          role="tab"
+          tabindex="-1"
+        >
+          Paper figures</button
+        ><button
+          aria-controls="slide-paper"
+          aria-selected="false"
+          data-page="paper"
+          id="tab-paper"
+          role="tab"
+          tabindex="-1"
+        >
           Paper
         </button>
-</nav>
-<a class="header-code" href="https://github.com/Anonymous-for-Sub/UniGeom" rel="noopener" target="_blank">Code <span aria-hidden="true">↗</span></a>
-</header>
-<main class="deck" id="stage" tabindex="-1">
-<section aria-labelledby="tab-overview" class="slide hero" data-slide="overview" id="slide-overview">
-<div class="hero-copy">
-<h1>UniGeom<span class="hero-period">.</span></h1>
-<h2>
-            Shared Geometry<br/>
+      </nav>
+      <a
+        class="header-code"
+        href="https://github.com/Anonymous-for-Sub/UniGeom"
+        rel="noopener"
+        target="_blank"
+        >Code <span aria-hidden="true"></span
+      ></a>
+    </header>
+    <main class="deck" id="stage" tabindex="-1">
+      <section
+        aria-labelledby="tab-overview"
+        class="slide hero"
+        data-slide="overview"
+        id="slide-overview"
+      >
+        <div class="hero-copy">
+          <h1>UniGeom<span class="hero-period">.</span></h1>
+          <h2>
+            Shared Geometry<br />
             for World Models
           </h2>
-<p class="hero-description">
+          <p class="hero-description">
             Can one model’s encoder drive another model’s predictions? UniGeom
             learns a small interface between independently trained
             representations, while keeping the world models frozen.
           </p>
-<div class="authors">Anonymous submission</div>
-<div class="hero-actions">
-<button class="button primary" data-go="geometry">
-              Explore the experiments <span aria-hidden="true">→</span></button><a class="button" href="assets/UniGeom.pdf" rel="noopener" target="_blank">Read the paper <span aria-hidden="true">↗</span></a>
-</div>
-</div>
-<div class="hero-visual">
-<canvas aria-label="Two measured representation spaces from independently trained LeWM encoders" id="hero-cloud"></canvas>
-<div class="hero-cloud-label a">Encoder A</div>
-<div class="hero-cloud-label b">Encoder B</div>
-<p class="hero-evidence">
+
+          <div class="hero-actions">
+            <button class="button primary" data-go="geometry">
+              Explore the experiments <span aria-hidden="true"></span></button
+            ><a
+              class="button"
+              href="assets/UniGeom.pdf"
+              rel="noopener"
+              target="_blank"
+              >Read the paper <span aria-hidden="true"></span
+            ></a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <canvas
+            aria-label="Two measured representation spaces from independently trained LeWM encoders"
+            id="hero-cloud"
+          ></canvas>
+          <div class="hero-cloud-label a">Encoder A</div>
+          <div class="hero-cloud-label b">Encoder B</div>
+          <p class="hero-evidence">
             606 shared observations · two independently trained encoders
           </p>
-</div>
-</section>
-<section aria-labelledby="tab-geometry" class="slide chapter" data-slide="geometry" hidden="" id="slide-geometry" role="tabpanel">
-<aside class="chapter-copy">
-<h2>Do the encoders find the same neighbors?</h2>
-<p>
+        </div>
+      </section>
+      <section
+        aria-labelledby="tab-geometry"
+        class="slide chapter"
+        data-slide="geometry"
+        hidden=""
+        id="slide-geometry"
+        role="tabpanel"
+      >
+        <aside class="chapter-copy">
+          <h2 id="geometry-heading">
+            Do the encoders find the same neighbors?
+          </h2>
+          <p id="geometry-description">
             Two independent LeWM encoders see the same 606 observations. Select
             a point to find the ten observations each encoder considers most
             similar.
           </p>
-<label class="field">Independent model pair<select id="geometry-pair">
-<option value="0">LeWM · Pair 1</option>
-<option value="1">LeWM · Pair 2</option>
-<option value="2">LeWM · Pair 3</option>
-</select></label>
-<div class="query-card">
-<div aria-label="Selected PushT observation" class="observation" id="query-image" role="img"></div>
-<div>
-<span class="small-label" id="query-id">Observation</span><strong id="query-overlap">Loading…</strong><span class="small-label">shared nearest neighbors</span>
-</div>
-</div>
-<div class="query-buttons">
-<button aria-label="Previous observation" id="previous-query">
-              ←</button><button id="next-query">Next observation →</button>
-</div>
-<div class="cohort-stat">
-<strong id="geometry-mean">—</strong><span>mean neighbor overlap<br/>across all 606 observations</span>
-</div>
-<p class="footnote">
-            Nearest neighbors are measured in the original 192D features. The
-            separate 3D t-SNE views are aligned for display only.
+          <label class="field"
+            >Independent model pair<select id="geometry-pair">
+              <option value="0">LeWM · Pair 1</option>
+              <option value="1">LeWM · Pair 2</option>
+              <option value="2">LeWM · Pair 3</option>
+            </select></label
+          >
+          <div class="query-card" data-geometry-detail="">
+            <div
+              aria-label="Selected PushT observation"
+              class="observation"
+              id="query-image"
+              role="img"
+            ></div>
+            <div>
+              <span class="small-label" id="query-id">Observation</span
+              ><strong id="query-overlap">Loading…</strong
+              ><span class="small-label">shared nearest neighbors</span>
+            </div>
+          </div>
+          <div class="query-buttons" data-geometry-detail="">
+            <button aria-label="Previous observation" id="previous-query">
+              Previous</button
+            ><button id="next-query">Next observation</button>
+          </div>
+          <div class="cohort-stat" data-geometry-detail="">
+            <strong id="geometry-mean">—</strong
+            ><span>mean neighbor overlap<br />across all 606 observations</span>
+          </div>
+          <p class="footnote">
+            The 3D t-SNE views are for display; neighbors use original 192D
+            distances.
           </p>
-</aside>
-<div class="chapter-stage geometry-stage">
-<div class="stage-top">
-<span><i class="legend-dot violet"></i> Shared neighbor
+          <div hidden="" id="geometry-cohort">
+            <div id="pair-comparison"></div>
+            <button
+              class="geometry-paper-thumb"
+              data-figure-open="shared-geometry"
+            >
+              <img
+                alt="The paper’s measured geometry comparison across independent model pairs"
+                loading="lazy"
+                src="assets/paper-figures/shared-geometry.svg"
+              /><span>View the paper’s geometry figure</span></button
+            ><button
+              class="button small"
+              data-gallery-target="matched-executions"
+              data-go="figures"
+            >
+              See the other tasks
+            </button>
+          </div>
+        </aside>
+        <div class="chapter-stage geometry-stage">
+          <div
+            aria-label="Shared geometry explanation"
+            class="stage-steps"
+            id="geometry-steps"
+            role="group"
+          >
+            <button aria-pressed="true" class="selected" data-geometry-step="0">
+              <span>01</span> Two spaces</button
+            ><button aria-pressed="false" data-geometry-step="1">
+              <span>02</span> Shared neighbors</button
+            ><button aria-pressed="false" data-geometry-step="2">
+              <span>03</span> Model pairs
+            </button>
+          </div>
+          <div class="stage-top">
+            <span
+              ><i class="legend-dot violet"></i> Shared neighbor
               <i class="legend-dot teal"></i> B only
-              <i class="legend-dot sand"></i> A only</span><button class="text-button" id="reset-camera">Reset view ↺</button>
-</div>
-<canvas aria-label="Interactive 3D representation spaces. Drag to rotate, click a point to inspect, or use the observation buttons." id="geometry-cloud" tabindex="0"></canvas>
-<div class="cloud-labels">
-<span>Encoder A</span><span>Encoder B</span>
-</div>
-<div aria-label="Selected encoder A neighbors" class="neighbor-strip" id="neighbor-strip"></div>
-<p class="stage-hint">
+              <i class="legend-dot sand"></i> A only</span
+            ><button class="text-button" id="reset-camera">Reset view</button>
+          </div>
+          <canvas
+            aria-label="Interactive 3D representation spaces. Drag to rotate, click a point to inspect, or use the observation buttons."
+            id="geometry-cloud"
+            tabindex="0"
+          ></canvas>
+          <div class="cloud-labels">
+            <span>Encoder A</span><span>Encoder B</span>
+          </div>
+          <div
+            aria-label="Selected encoder A neighbors"
+            class="neighbor-strip"
+            id="neighbor-strip"
+          ></div>
+          <p class="stage-hint">
             Drag to rotate · select a point to inspect its neighborhood
           </p>
-<p class="data-error" hidden="" id="geometry-error"></p>
-</div>
-</section>
-<section aria-labelledby="tab-connection" class="slide chapter" data-slide="connection" hidden="" id="slide-connection" role="tabpanel">
-<aside class="chapter-copy">
-<h2>Connect one encoder to another model’s predictor.</h2>
-<p>
-            A paired observation gives two feature targets automatically. We
-            learn their correspondence while keeping both encoders and the
-            receiver’s dynamics frozen.
+          <p class="data-error" hidden="" id="geometry-error"></p>
+        </div>
+      </section>
+      <section
+        aria-labelledby="tab-connection"
+        class="slide chapter"
+        data-slide="connection"
+        hidden=""
+        id="slide-connection"
+        role="tabpanel"
+      >
+        <aside class="chapter-copy">
+          <h2>The framework in the paper.</h2>
+          <p id="framework-description">
+            We calibrate the boundary between perception and dynamics. Both
+            world models remain frozen; only the interface learns from
+            representations of common observations.
           </p>
-<div class="step-list" id="connection-steps">
-<button class="selected" data-step="0">
-<span>01</span> Encode a shared observation</button><button data-step="1">
-<span>02</span> Calibrate the interface</button><button data-step="2">
-<span>03</span> Predict with the receiver</button><button data-step="3">
-<span>04</span> Execute and observe again
-            </button>
-</div>
-<p class="detail-copy" id="connection-detail"></p>
-<button class="button small" id="play-connection">
+          <p
+            class="detail-copy"
+            data-walkthrough-only=""
+            hidden=""
+            id="connection-detail"
+          ></p>
+          <button
+            class="button small"
+            data-walkthrough-only=""
+            hidden=""
+            id="play-connection"
+          >
             Replay these steps
           </button>
-</aside>
-<div class="chapter-stage connection-stage">
-<div class="stage-top">
-<span><i class="legend-dot violet"></i> Trainable interface
-              <i class="legend-dot teal"></i> Frozen receiver</span><span class="small-label">Architecture illustration</span>
-</div>
-<div aria-label="Diagram; scroll horizontally on narrow screens" class="diagram-scroll" tabindex="0">
-<svg aria-label="Source perception connects through a calibrated interface to the frozen receiver dynamics. The receiver encoder supplies calibration targets." id="connection-diagram" role="img" viewbox="0 0 760 460"></svg>
-</div>
-<div class="equation">
-            F<sub>B</sub>( T<sub>A→B</sub>( E<sub>A</sub>(o<sub>t</sub>) ),
-            a<sub>t</sub> ) → ẑ<sub>t+1</sub><sup>B</sup>
-</div>
-<p class="stage-hint">
-            History and goal use the same interface. The controller keeps the
-            receiver’s action conventions.
+          <p class="framework-caption" id="framework-caption">
+            The original figure shows the receiver-specific interfaces and their
+            calibration. Open it at full size to read every connection and
+            label, or switch to the animated explanation.
           </p>
-</div>
-</section>
-<section aria-labelledby="tab-interface" class="slide chapter" data-slide="interface" hidden="" id="slide-interface" role="tabpanel">
-<aside class="chapter-copy">
-<h2>Adapt spatial features to the receiver.</h2>
-<p>
+          <button class="button small" data-figure-open="problem">
+            Why state alignment is not enough
+          </button>
+        </aside>
+        <div class="chapter-stage connection-stage">
+          <div aria-label="Framework view" class="figure-mode" role="group">
+            <button
+              aria-pressed="true"
+              class="selected"
+              data-framework-mode="paper"
+            >
+              Paper framework</button
+            ><button aria-pressed="false" data-framework-mode="walkthrough">
+              Step-by-step animation
+            </button>
+          </div>
+          <figure class="paper-framework" id="paper-framework">
+            <button
+              aria-label="Enlarge the original framework figure"
+              class="paper-image-button"
+              data-figure-open="framework"
+            >
+              <img
+                alt="Original UniGeom framework figure from the paper"
+                src="assets/paper-figures/framework.svg"
+              />
+            </button>
+            <figcaption>
+              Figure 3 · Original paper figure, preserved as a scalable
+              vector.<button class="button small" data-figure-open="framework">
+                Enlarge figure
+              </button>
+            </figcaption>
+          </figure>
+          <div hidden="" id="connection-walkthrough">
+            <div class="stage-steps" id="connection-steps">
+              <button class="selected" data-step="0">
+                <span>01</span> Encode a shared observation</button
+              ><button data-step="1">
+                <span>02</span> Calibrate the interface</button
+              ><button data-step="2">
+                <span>03</span> Predict with the receiver</button
+              ><button data-step="3">
+                <span>04</span> Execute and observe again
+              </button>
+            </div>
+            <div class="stage-top">
+              <span
+                ><i class="legend-dot violet"></i> Trainable interface
+                <i class="legend-dot teal"></i> Frozen receiver</span
+              ><span class="small-label">Architecture illustration</span>
+            </div>
+            <div
+              aria-label="Diagram; scroll horizontally on narrow screens"
+              class="diagram-scroll"
+              tabindex="0"
+            >
+              <svg
+                aria-label="Source perception connects through a calibrated interface to the frozen receiver dynamics. The receiver encoder supplies calibration targets."
+                id="connection-diagram"
+                role="img"
+                viewbox="0 0 760 460"
+              ></svg>
+            </div>
+            <div class="equation">
+              F<sub>B</sub>( T<sub>A→B</sub>( E<sub>A</sub>(o<sub>t</sub>) ),
+              a<sub>t</sub> ) → ẑ<sub>t+1</sub><sup>B</sup>
+            </div>
+            <p class="stage-hint">
+              History and goal use the same interface. The controller keeps the
+              receiver’s action conventions.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section
+        aria-labelledby="tab-interface"
+        class="slide chapter"
+        data-slide="interface"
+        hidden=""
+        id="slide-interface"
+        role="tabpanel"
+      >
+        <aside class="chapter-copy">
+          <h2>Adapt spatial features to the receiver.</h2>
+          <p>
             The LeWM source provides a 16 × 16 token grid. DINO-WM expects 14 ×
             14 tokens in its own feature space. A learned residual refines the
             resampled grid before channel projection.
           </p>
-<div class="step-list" id="interface-steps">
-<button class="selected" data-stage="0">
-<span>01</span> Resample the source grid</button><button data-stage="1">
-<span>02</span> Attend to source tokens</button><button data-stage="2">
-<span>03</span> Add the spatial residual</button><button data-stage="3">
-<span>04</span> Restore receiver features
+          <p class="detail-copy" id="interface-detail"></p>
+          <label class="field" id="head-control"
+            >Illustrative attention head<select id="attention-head">
+              <option value="0">Head 1</option>
+              <option value="1">Head 2</option>
+            </select></label
+          >
+        </aside>
+        <div class="chapter-stage interface-stage">
+          <div class="stage-steps" id="interface-steps">
+            <button class="selected" data-stage="0">
+              <span>01</span> Resample the source grid</button
+            ><button data-stage="1">
+              <span>02</span> Attend to source tokens</button
+            ><button data-stage="2">
+              <span>03</span> Add the spatial residual</button
+            ><button data-stage="3">
+              <span>04</span> Restore receiver features
             </button>
-</div>
-<p class="detail-copy" id="interface-detail"></p>
-<label class="field" id="head-control">Illustrative attention head<select id="attention-head">
-<option value="0">Head 1</option>
-<option value="1">Head 2</option>
-</select></label>
-</aside>
-<div class="chapter-stage interface-stage">
-<div class="stage-top">
-<span>LeWM → DINO-WM</span><span class="small-label">Computed teaching example</span>
-</div>
-<div aria-label="Diagram; scroll horizontally on narrow screens" class="diagram-scroll" tabindex="0">
-<svg aria-label="Interactive token resampling. Select a target token to inspect its source contributions." id="interface-diagram" role="img" viewbox="0 0 760 480"></svg>
-</div>
-<p class="equation" id="interface-equation"></p>
-<p class="stage-hint">
+          </div>
+          <div class="stage-top">
+            <span>LeWM → DINO-WM</span
+            ><span class="small-label">Computed teaching example</span>
+          </div>
+          <div
+            aria-label="Diagram; scroll horizontally on narrow screens"
+            class="diagram-scroll"
+            tabindex="0"
+          >
+            <svg
+              aria-label="Interactive token resampling. Select a target token to inspect its source contributions."
+              id="interface-diagram"
+              role="img"
+              viewbox="0 0 760 480"
+            ></svg>
+          </div>
+          <p class="equation" id="interface-equation"></p>
+          <p class="stage-hint">
             Select a target token. Colors show illustrative scalar values and
             computed weights.
           </p>
-</div>
-</section>
-<section aria-labelledby="tab-results" class="slide chapter" data-slide="results" hidden="" id="slide-results" role="tabpanel">
-<aside class="chapter-copy">
-<h2>How much control survives the connection?</h2>
-<p>
+        </div>
+      </section>
+      <section
+        aria-labelledby="tab-results"
+        class="slide chapter"
+        data-slide="results"
+        hidden=""
+        id="slide-results"
+        role="tabpanel"
+      >
+        <aside class="chapter-copy">
+          <h2>How much control survives the connection?</h2>
+          <p>
             Compare complete evaluation cohorts. Every connected route uses the
             receiver’s existing prediction and control system.
           </p>
-<label class="field">Experiment<select id="results-study">
-<option value="navigation">TwoRooms · MAE → LeWM</option>
-<option value="spatial">PushT · LeWM → DINO-WM</option>
-<option value="second_source">PushT · MAE → DINO-WM</option>
-<option value="brightness">PushT · view recalibration</option>
-</select></label><label class="field">Metric<select id="results-metric">
-<option value="terminal_pct">Terminal success (%)</option>
-<option value="native_terminal_retained_pct">
+          <label class="field"
+            >Experiment<select id="results-study">
+              <option value="navigation">TwoRooms · MAE → LeWM</option>
+              <option value="spatial">PushT · LeWM → DINO-WM</option>
+              <option value="second_source">PushT · MAE → DINO-WM</option>
+              <option value="brightness">PushT · view recalibration</option>
+            </select></label
+          ><label class="field"
+            >Metric<select id="results-metric">
+              <option value="terminal_pct">Terminal success (%)</option>
+              <option value="native_terminal_retained_pct">
                 Native successes retained (%)
               </option>
-<option value="holding_pct">Last-ten success (%)</option>
-</select></label>
-<p class="detail-copy" id="results-context"></p>
-<a class="text-link" href="assets/UniGeom.pdf" rel="noopener" target="_blank">Full protocols and comparisons ↗</a>
-</aside>
-<div class="chapter-stage results-stage">
-<div class="stage-top">
-<span id="chart-title">Terminal success (%)</span><span class="small-label" id="chart-cohort"></span>
-</div>
-<div id="results-chart" role="img"></div>
-<div class="result-insight" id="result-insight"></div>
-<p class="stage-hint" id="results-note"></p>
-</div>
-</section>
-<section aria-labelledby="tab-experiments" class="slide experiments-section" data-slide="experiments" hidden="" id="slide-experiments">
-<div class="experiment-layout">
-<aside class="chapter-copy experiment-copy">
-<h2>Compare the recorded executions.</h2>
-<p>
+              <option value="holding_pct">Last-ten success (%)</option>
+            </select></label
+          >
+          <p class="detail-copy" id="results-context"></p>
+          <a
+            class="text-link"
+            href="assets/UniGeom.pdf"
+            rel="noopener"
+            target="_blank"
+            >Full protocols and comparisons
+          </a>
+        </aside>
+        <div class="chapter-stage results-stage">
+          <div class="stage-top">
+            <span id="chart-title">Terminal success (%)</span
+            ><span class="small-label" id="chart-cohort"></span>
+          </div>
+          <div id="results-chart" role="img"></div>
+          <div class="result-insight" id="result-insight"></div>
+          <p class="stage-hint" id="results-note"></p>
+        </div>
+      </section>
+      <section
+        aria-labelledby="tab-experiments"
+        class="slide experiments-section"
+        data-slide="experiments"
+        hidden=""
+        id="slide-experiments"
+      >
+        <div class="experiment-layout">
+          <aside class="chapter-copy experiment-copy">
+            <h2>Compare the recorded executions.</h2>
+            <p>
               Each comparison starts from the same state and keeps the receiver
               and controller fixed. Select a task to play the two routes side by
               side.
             </p>
-<div aria-label="Recorded experiment" class="experiment-list" role="tablist">
-<button aria-selected="true" class="active" data-case="0" role="tab">
-<span>Navigation</span><small>MAE → LeWM</small></button><button aria-selected="false" data-case="1" role="tab" tabindex="-1">
-<span>PushT · LeWM source</span><small>LeWM → DINO-WM</small></button><button aria-selected="false" data-case="2" role="tab" tabindex="-1">
-<span>PushT · MAE source</span><small>MAE → DINO-WM</small></button><button aria-selected="false" data-case="3" role="tab" tabindex="-1">
-<span>Dimmed observations</span><small>Clean → mixed calibration</small></button><button aria-selected="false" data-case="4" role="tab" tabindex="-1">
-<span>Reacher · recurrent receiver</span><small>LeWM → Dreamer</small>
-</button>
-</div>
-<p class="footnote">
+            <div
+              aria-label="Recorded experiment"
+              class="experiment-list"
+              role="tablist"
+            >
+              <button
+                aria-selected="true"
+                class="active"
+                data-case="0"
+                role="tab"
+              >
+                <span>Navigation</span><small>MAE LeWM</small></button
+              ><button
+                aria-selected="false"
+                data-case="1"
+                role="tab"
+                tabindex="-1"
+              >
+                <span>PushT · LeWM source</span
+                ><small>LeWM DINO-WM</small></button
+              ><button
+                aria-selected="false"
+                data-case="2"
+                role="tab"
+                tabindex="-1"
+              >
+                <span>PushT · MAE source</span
+                ><small>MAE DINO-WM</small></button
+              ><button
+                aria-selected="false"
+                data-case="3"
+                role="tab"
+                tabindex="-1"
+              >
+                <span>Dimmed observations</span
+                ><small>Clean mixed calibration</small></button
+              ><button
+                aria-selected="false"
+                data-case="4"
+                role="tab"
+                tabindex="-1"
+              >
+                <span>Reacher · recurrent receiver</span
+                ><small>LeWM Dreamer</small>
+              </button>
+            </div>
+            <p class="footnote">
               These are selected recorded examples. The results page reports the
               full evaluation cohorts.
             </p>
-</aside>
-<div class="experiment-player">
-<video aria-label="Navigation comparison" controls="" id="case-video" playsinline="" poster="assets/videos/01_navigation.png" preload="metadata" src="assets/videos/01_navigation.mp4"></video>
-<div class="case-description">
-<div>
-<h3 id="case-title">Arrive at the same goal.</h3>
-<p id="case-description"></p>
-</div>
-<div class="case-metric">
-<span id="case-metric-label">Final distance to goal</span><strong id="case-metric">102.0 <span>→</span> 1.3 <small>px</small></strong>
-</div>
-</div>
-<p class="footnote" id="case-note"></p>
-</div>
-</div>
-</section>
-<section aria-labelledby="tab-paper" class="slide paper-section" data-slide="paper" hidden="" id="slide-paper">
-<div class="section-heading">
-<div>
-<h2>UniGeom: Shared Geometry for World Models</h2>
-</div>
-<a class="button primary" href="assets/UniGeom.pdf" rel="noopener" target="_blank">Read the manuscript ↗</a>
-</div>
-<div class="paper-grid">
-<p>
+          </aside>
+          <div class="experiment-player">
+            <video
+              aria-label="Navigation comparison"
+              controls=""
+              id="case-video"
+              playsinline=""
+              poster="assets/videos/01_navigation.png"
+              preload="metadata"
+              src="assets/videos/01_navigation.mp4"
+            ></video>
+            <div class="case-description">
+              <div>
+                <h3 id="case-title">Arrive at the same goal.</h3>
+                <p id="case-description"></p>
+              </div>
+              <div class="case-metric">
+                <span id="case-metric-label">Final distance to goal</span
+                ><strong id="case-metric"
+                  >102.0 <span>→</span> 1.3 <small>px</small></strong
+                >
+              </div>
+            </div>
+            <p class="footnote" id="case-note"></p>
+          </div>
+        </div>
+      </section>
+      <section
+        aria-labelledby="tab-figures"
+        class="slide chapter figures-section"
+        data-slide="figures"
+        hidden=""
+        id="slide-figures"
+        role="tabpanel"
+      >
+        <aside class="chapter-copy">
+          <h2>Figures from the paper.</h2>
+          <p>
+            Explore the original figures, from representation geometry to
+            prediction and behavior across tasks.
+          </p>
+          <div
+            aria-label="Paper figures"
+            class="paper-figure-list"
+            id="paper-figure-list"
+            role="tablist"
+          ></div>
+        </aside>
+        <div class="chapter-stage paper-figure-stage">
+          <div class="paper-figure-heading">
+            <h3 id="paper-figure-title">Loading figures</h3>
+            <button class="button small" id="enlarge-gallery">
+              Enlarge figure
+            </button>
+          </div>
+          <button
+            aria-label="Enlarge selected paper figure"
+            class="paper-image-button"
+            id="gallery-image-button"
+          >
+            <img alt="Selected figure from the paper" id="paper-figure-image" />
+          </button>
+          <p class="paper-figure-caption" id="paper-figure-caption"></p>
+          <p class="footnote" id="paper-figure-scope"></p>
+        </div>
+      </section>
+      <section
+        aria-labelledby="tab-paper"
+        class="slide paper-section"
+        data-slide="paper"
+        hidden=""
+        id="slide-paper"
+      >
+        <div class="section-heading">
+          <div>
+            <h2>UniGeom: Shared Geometry for World Models</h2>
+          </div>
+          <a
+            class="button primary"
+            href="assets/UniGeom.pdf"
+            rel="noopener"
+            target="_blank"
+            >Read the manuscript
+          </a>
+        </div>
+        <div class="paper-grid">
+          <p>
             Independently trained models can describe the same world in
             different representation spaces. UniGeom studies whether their
             shared structure supports functional connections. We calibrate
@@ -271,60 +646,109 @@
             revealing how interface design and observation coverage affect the
             resulting behavior.
           </p>
-<div class="paper-authors">
-<div class="authors">Anonymous submission</div>
-
-</div>
-<div class="citation">
-<div class="citation-head">
-<span>BibTeX</span><button id="copy-citation">Copy citation</button>
-</div>
-<pre id="bibtex">@misc{unigeom2026,
+          <div class="paper-authors">
+            <div class="authors">Anonymous submission</div>
+          </div>
+          <div class="citation">
+            <div class="citation-head">
+              <span>BibTeX</span
+              ><button id="copy-citation">Copy citation</button>
+            </div>
+            <pre id="bibtex">
+@misc{unigeom2026,
   title={UniGeom: Shared Geometry for World Models},
   author={Anonymous},
   year={2026},
   howpublished={Anonymous manuscript}
-}</pre>
-<span id="copy-status" role="status"></span>
-</div>
-</div>
-<p class="reference-credit">
+}</pre
+            >
+            <span id="copy-status" role="status"></span>
+          </div>
+        </div>
+        <p class="reference-credit">
           Interaction inspired by
-          <a href="https://dominik-schnaus.github.io/unpaired-rosetta/" rel="noopener" target="_blank">Shared Geometry as a Rosetta Stone</a>.
+          <a
+            href="https://dominik-schnaus.github.io/unpaired-rosetta/"
+            rel="noopener"
+            target="_blank"
+            >Shared Geometry as a Rosetta Stone</a
+          >.
         </p>
-</section>
-</main>
-<footer class="deck-controls">
-<div class="tour-progress">
-<input aria-label="Seek through presentation" id="tour-seek" max="1000" min="0" step="1" type="range" value="0"/>
-</div>
-<div class="controls-inner">
-<div class="page-position">
-<span id="page-count">01 / 07</span><span id="page-name">Overview</span>
-</div>
-<div class="playback">
-<button aria-pressed="false" class="autoplay" id="autoplay">
-<svg aria-hidden="true" viewbox="0 0 20 20">
-<path d="M6 4 L15 10 L6 16 Z"></path></svg><span>Auto play</span></button><button aria-label="Replay current page" class="icon-button" id="replay-page" title="Replay current page">
-            ↺
+      </section>
+    </main>
+    <footer class="deck-controls">
+      <div class="tour-progress">
+        <input
+          aria-label="Seek through presentation"
+          id="tour-seek"
+          max="1000"
+          min="0"
+          step="1"
+          type="range"
+          value="0"
+        />
+      </div>
+      <div class="controls-inner">
+        <div class="page-position">
+          <span id="page-count">01 / 07</span
+          ><span id="page-name">Overview</span>
+        </div>
+        <div class="playback">
+          <button aria-pressed="false" class="autoplay" id="autoplay">
+            <span>Auto play</span></button
+          ><button
+            aria-label="Replay current page"
+            class="icon-button"
+            id="replay-page"
+            title="Replay current page"
+          >
+            Replay
           </button>
-</div>
-<div class="page-arrows">
-<button aria-label="Previous page" class="page-arrow" id="previous-page">
-<svg aria-hidden="true" viewbox="0 0 20 20">
-<path d="M12 4 L6 10 L12 16"></path>
-</svg></button><button aria-label="Next page" class="page-arrow" id="next-page">
-<span id="next-page-label">Shared geometry</span><svg aria-hidden="true" viewbox="0 0 20 20">
-<path d="M8 4 L14 10 L8 16"></path>
-</svg>
-</button>
-</div>
-</div>
-</footer>
-<div aria-live="polite" class="sr-only" id="page-announcement" role="status"></div>
-<noscript><p class="noscript">
+        </div>
+        <div class="page-arrows">
+          <button
+            aria-label="Previous page"
+            class="page-arrow"
+            id="previous-page"
+          >
+            Previous</button
+          ><button aria-label="Next page" class="page-arrow" id="next-page">
+            <span id="next-page-label">Next: Shared geometry</span>
+          </button>
+        </div>
+      </div>
+    </footer>
+    <div
+      aria-live="polite"
+      class="sr-only"
+      id="page-announcement"
+      role="status"
+    ></div>
+    <noscript
+      ><p class="noscript">
         Enable JavaScript to explore the presentation.
         <a href="assets/UniGeom.pdf">Read the paper</a>.
-      </p></noscript>
-</body>
+      </p></noscript
+    >
+    <dialog aria-labelledby="viewer-title" id="figure-viewer">
+      <div class="viewer-toolbar">
+        <h2 id="viewer-title">Paper figure</h2>
+        <label
+          >Zoom
+          <input
+            id="figure-zoom"
+            max="300"
+            min="100"
+            step="10"
+            type="range"
+            value="100" /></label
+        ><a class="button small" download="" id="figure-download">Save figure</a
+        ><button class="button small" id="close-figure">Close</button>
+      </div>
+      <div id="viewer-image-scroll">
+        <img alt="Original paper figure at full resolution" id="viewer-image" />
+      </div>
+      <p id="viewer-caption"></p>
+    </dialog>
+  </body>
 </html>

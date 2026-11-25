@@ -1,5 +1,5 @@
-import { GeometryView } from "./geometry.js?v=20261126";
-import { initConnection, initInterface } from "./diagrams.js?v=20261126";
+import { GeometryView } from "./geometry.js?v=20261126b";
+import { initConnection, initInterface } from "./diagrams.js?v=20261126b";
 const $ = (s) => document.querySelector(s);
 
 function tabKeys(container, selector) {
@@ -274,8 +274,12 @@ $("#copy-citation").onclick = async () => {
   }
 };
 
-import { initDeck } from "./deck.js?v=20261126";
+import { initDeck } from "./deck.js?v=20261126b";
+import { initPaperViews } from "./paper-views.js?v=20261126b";
+const paperViews = initPaperViews();
+window.paperViews = paperViews;
 initDeck({
+  paperViews,
   connection,
   spatialInterface,
   showCase,

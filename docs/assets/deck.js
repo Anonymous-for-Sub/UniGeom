@@ -1,11 +1,12 @@
 const $ = (s) => document.querySelector(s);
 const pages = [
   { id: "overview", label: "Overview", duration: 14000 },
-  { id: "geometry", label: "Shared geometry", duration: 18000 },
-  { id: "connection", label: "Connection", duration: 20000 },
+  { id: "geometry", label: "Shared geometry", duration: 42000 },
+  { id: "connection", label: "Framework", duration: 30000 },
   { id: "interface", label: "Interface", duration: 24000 },
   { id: "results", label: "Results", duration: 28000 },
   { id: "experiments", label: "Experiments", duration: 57000 },
+  { id: "figures", label: "Paper figures", duration: 64000 },
   { id: "paper", label: "Paper", duration: 14000 },
 ];
 const offsets = pages.map((_, i) =>
@@ -38,14 +39,14 @@ export function initDeck(api) {
       : elapsed >= pages[page].duration && page === pages.length - 1
         ? "Play again"
         : "Auto play";
-    $("#autoplay svg").innerHTML = playing
-      ? '<path d="M5 4 H8 V16 H5 Z M12 4 H15 V16 H12 Z"/>'
-      : '<path d="M6 4 L15 10 L6 16 Z"/>';
-    $("#page-count").textContent = `${String(page + 1).padStart(2, "0")} / 07`;
+    $("#page-count").textContent =
+      `${String(page + 1).padStart(2, "0")} / ${String(pages.length).padStart(2, "0")}`;
     $("#page-name").textContent = pages[page].label;
     $("#previous-page").disabled = page === 0;
     $("#next-page").disabled = page === pages.length - 1;
-    $("#next-page-label").textContent = pages[page + 1]?.label || "End";
+    $("#next-page-label").textContent = pages[page + 1]
+      ? `Next: ${pages[page + 1].label}`
+      : "End";
     const ratio = Math.min(1000, ((offsets[page] + elapsed) / total) * 1000);
     $("#tour-seek").value = ratio;
     $("#tour-seek").style.setProperty("--progress", `${ratio / 10}%`);
@@ -63,6 +64,7 @@ export function initDeck(api) {
     v.pause();
     document.querySelectorAll("svg").forEach((el) => el.pauseAnimations?.());
     window.geometryView?.pauseHero();
+    window.geometryView?.pauseExploration();
     updateControls();
   }
   function mediaAtTime(force = false) {
@@ -98,7 +100,11 @@ export function initDeck(api) {
   function sync(force = false) {
     const id = pages[page].id;
     if (id === "connection") {
-      const step = Math.min(3, Math.floor(elapsed / 5000));
+      const step = Math.min(
+        3,
+        Math.max(0, Math.floor((elapsed - 10000) / 5000)),
+      );
+      api.paperViews.setFramework(elapsed < 10000 ? "paper" : "walkthrough");
       if (cue !== `connection-${step}` || force) {
         api.connection.setStep(step);
         cue = `connection-${step}`;
@@ -118,12 +124,33 @@ export function initDeck(api) {
         cue = study;
       }
     } else if (id === "geometry") {
-      const index = Math.min(2, Math.floor(elapsed / 6000));
-      if ((cue !== `pair-${index}` || force) && window.geometryView) {
-        const select = $("#geometry-pair");
-        select.value = String(index);
-        select.dispatchEvent(new Event("change"));
-        cue = `pair-${index}`;
+      const step = elapsed < 12000 ? 0 : elapsed < 28000 ? 1 : 2;
+      const index =
+        step === 2 ? Math.min(2, Math.floor((elapsed - 28000) / 4600)) : 0;
+      if (cue !== `geometry-${step}-${index}` || force) {
+        api.paperViews.selectGeometry(step);
+        if (window.geometryView) {
+          const select = $("#geometry-pair");
+          select.value = String(index);
+          select.dispatchEvent(new Event("change"));
+        }
+        cue = `geometry-${step}-${index}`;
+      }
+    } else if (id === "figures") {
+      const ids = [
+        "problem",
+        "framework",
+        "shared-geometry",
+        "prediction-controls",
+        "learned-source",
+        "matched-executions",
+        "manipulation-predictions",
+        "driving-context",
+      ];
+      const index = Math.min(7, Math.floor(elapsed / 8000));
+      if (cue !== ids[index] || force) {
+        api.paperViews.selectFigure(ids[index]);
+        cue = ids[index];
       }
     } else if (id === "experiments") mediaAtTime(force);
   }
@@ -155,10 +182,13 @@ export function initDeck(api) {
       new CustomEvent("chapterchange", { detail: pages[page].id }),
     );
     $("#page-announcement").textContent =
-      `Page ${page + 1} of 7. ${pages[page].label}.`;
+      `Page ${page + 1} of ${pages.length}. ${pages[page].label}.`;
     if (pages[page].id === "overview" && !explicitPause)
       window.geometryView?.resumeHero();
     else window.geometryView?.pauseHero();
+    if (pages[page].id === "geometry" && !explicitPause)
+      window.geometryView?.resumeExploration();
+    else window.geometryView?.pauseExploration();
     sync(true);
     updateControls();
     last = performance.now();
@@ -190,6 +220,7 @@ export function initDeck(api) {
     playing = true;
     document.querySelectorAll("svg").forEach((el) => el.unpauseAnimations?.());
     if (pages[page].id === "overview") window.geometryView?.resumeHero();
+    if (pages[page].id === "geometry") window.geometryView?.resumeExploration();
     sync(true);
     updateControls();
     last = performance.now();
@@ -200,6 +231,7 @@ export function initDeck(api) {
     change(index, 0, "push");
     explicitPause = false;
     if (page === 0) window.geometryView?.resumeHero();
+    if (pages[page].id === "geometry") window.geometryView?.resumeExploration();
   }
   $("#autoplay").onclick = () => (playing ? pause() : play());
   $("#previous-page").onclick = () => go(page - 1);
@@ -214,6 +246,8 @@ export function initDeck(api) {
       (b.onclick = () => {
         const id = b.dataset.page || b.dataset.go;
         go(pages.findIndex((p) => p.id === id));
+        if (b.dataset.galleryTarget)
+          api.paperViews.selectFigure(b.dataset.galleryTarget);
       }),
   );
   $("#tour-seek").addEventListener("input", (e) => {
@@ -246,9 +280,27 @@ export function initDeck(api) {
   );
   $("#stage").addEventListener("click", (e) => {
     if (!e.isTrusted) return;
-    const b = e.target.closest("[data-step],[data-stage],[data-case]");
+    const b = e.target.closest(
+      "[data-step],[data-stage],[data-case],[data-geometry-step],[data-framework-mode],[data-paper-figure]",
+    );
     if (!b) return;
-    if (b.dataset.step !== undefined) elapsed = +b.dataset.step * 5000;
+    if (b.dataset.step !== undefined) elapsed = 10000 + +b.dataset.step * 5000;
+    if (b.dataset.geometryStep !== undefined)
+      elapsed = [0, 12000, 28000][+b.dataset.geometryStep];
+    if (b.dataset.frameworkMode !== undefined)
+      elapsed = b.dataset.frameworkMode === "paper" ? 0 : 10000;
+    if (b.dataset.paperFigure !== undefined)
+      elapsed =
+        [
+          "problem",
+          "framework",
+          "shared-geometry",
+          "prediction-controls",
+          "learned-source",
+          "matched-executions",
+          "manipulation-predictions",
+          "driving-context",
+        ].indexOf(b.dataset.paperFigure) * 8000;
     if (b.dataset.stage !== undefined) elapsed = +b.dataset.stage * 6000;
     if (b.dataset.case !== undefined) elapsed = cases[+b.dataset.case].start;
     cue = "";
@@ -256,7 +308,8 @@ export function initDeck(api) {
   });
   $("#stage").addEventListener("change", (e) => {
     if (!e.isTrusted) return;
-    if (e.target.id === "geometry-pair") elapsed = +e.target.value * 6000;
+    if (e.target.id === "geometry-pair" && api.paperViews.geometryStep === 2)
+      elapsed = 28000 + +e.target.value * 4600;
     if (e.target.id === "results-study")
       elapsed =
         ["navigation", "spatial", "second_source", "brightness"].indexOf(
@@ -377,6 +430,8 @@ export function initDeck(api) {
   });
   window.addEventListener("geometryready", () => {
     if (page !== 0 || explicitPause) window.geometryView?.pauseHero();
+    if (pages[page].id !== "geometry" || explicitPause)
+      window.geometryView?.pauseExploration();
     sync(true);
   });
   window.deck = {

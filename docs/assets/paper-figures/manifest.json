@@ -1,0 +1,93 @@
+{
+  "version": "arXiv manuscript, 24 November 2026",
+  "figures": [
+    {
+      "id": "framework",
+      "title": "UniGeom framework",
+      "file": "framework.svg",
+      "caption": "UniGeom maps source history and goal features into a frozen receiver. The lower panel shows the original residual spatial resampling design.",
+      "scope": "Method architecture; paired observations calibrate the interface. The receiver encoder is absent from the connected deployment route.",
+      "figureLabel": "Figure 3",
+      "width": 1345.0,
+      "height": 603.0,
+      "bytes": 807745
+    },
+    {
+      "id": "problem",
+      "title": "State correspondence and functional equivalence",
+      "file": "problem.svg",
+      "caption": "Nearby mapped and native states can produce different futures and action preferences under the same frozen dynamics.",
+      "scope": "Conceptual comparison under a shared frozen receiver; the two routes may prefer different actions.",
+      "figureLabel": "Figure 1, bottom panel",
+      "width": 1230.0,
+      "height": 155.0,
+      "bytes": 394368
+    },
+    {
+      "id": "shared-geometry",
+      "title": "Shared geometry across learned models",
+      "file": "shared-geometry.svg",
+      "caption": "Three independently trained LeWM pairs share local neighbors across 606 matched observations per pair.",
+      "scope": "Neighbors use original 192-dimensional distances. Diamonds mark mean overlap; the dashed line is the 1.65% random-label expectation.",
+      "figureLabel": "Figure 2c",
+      "width": 172.8000030517578,
+      "height": 162.0,
+      "bytes": 113635
+    },
+    {
+      "id": "prediction-controls",
+      "title": "Prediction controls",
+      "file": "prediction-controls.svg",
+      "caption": "Four directed connections compare native, residual, ridge, state-copy and action-shuffle prediction routes.",
+      "scope": "Cells print raw one-step feature MSE. Color normalizes by native error within each receiver; lower is better.",
+      "figureLabel": "Figure 4a",
+      "width": 172.8000030517578,
+      "height": 162.0,
+      "bytes": 80817
+    },
+    {
+      "id": "learned-source",
+      "title": "Learned-source calibration efficiency",
+      "file": "learned-source.svg",
+      "caption": "Learned and random source encoders are compared at matched calibration trajectory budgets.",
+      "scope": "Four-step feature MSE; lower is better. Endpoints average three repeats. Horizontal intervals are conditional parent-bootstrap 95% intervals over 606 evaluation parents. Labels show random/learned error ratios.",
+      "figureLabel": "Figure 4b",
+      "width": 172.8000030517578,
+      "height": 162.0,
+      "bytes": 74456
+    },
+    {
+      "id": "matched-executions",
+      "title": "Matched behavior across four tasks",
+      "file": "matched-executions.svg",
+      "caption": "Recorded comparisons span TwoRooms, PushT, driving and Reacher, with matched starts and task conditions within each column.",
+      "scope": "Selected examples. Comparators are ridge for TwoRooms and Reacher, fixed resampling for PushT, and native perception for driving. Driving shows simulated four-second terminal states with PDM scores; Reacher shows step 1,000 and cumulative return.",
+      "figureLabel": "Figure 5",
+      "width": 252.0,
+      "height": 165.9600067138672,
+      "bytes": 243288
+    },
+    {
+      "id": "manipulation-predictions",
+      "title": "Predictive interfaces across manipulation tasks",
+      "file": "manipulation-predictions.svg",
+      "caption": "Granular feature-error maps and RoboTwin observed-frame retrievals visualize selected predictions from the paper.",
+      "scope": "Granular uses two-step forecasts at seed 0 with a common error scale. RoboTwin uses horizon-16 nearest-neighbor RGB readouts from the same 916-frame recorded bank, including true futures. These are post-hoc retrievals, not generated images or executed trajectories; values are forecast feature MSE.",
+      "figureLabel": "Figure 6",
+      "width": 504.0,
+      "height": 197.27999877929688,
+      "bytes": 943238
+    },
+    {
+      "id": "driving-context",
+      "title": "Driving observations and saved trajectories",
+      "file": "driving-context.svg",
+      "caption": "Original front-camera observations accompany saved four-second trajectories and enlarged terminal positions in Boston and Singapore.",
+      "scope": "Two selected driving replays. Gray is native perception and purple the connected interface. Camera images are original observations; map panels visualize saved simulation states under non-reactive evaluation.",
+      "figureLabel": "Figure S25",
+      "width": 252.0,
+      "height": 198.0,
+      "bytes": 4305794
+    }
+  ]
+}
