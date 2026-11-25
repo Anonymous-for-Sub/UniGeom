@@ -2,8 +2,12 @@ The scene illustrates the transfer of a visual interface between a laboratory
 and a warehouse. Its animation is an application illustration.
 
 The environment geometry is adapted from the UniGeom five-pose capability
-bridge Blender scene. The robot uses the Go2 quadruped and Airbot arm meshes
-from its MuJoCo model. Geometry was simplified and quantized for web display.
+bridge Blender scene. The robot uses the Unitree Go2 quadruped and six-axis AIRBOT Play arm from
+the Apache-2.0 UniLab model in the unilabsim/UniLab repository. Its model
+file is go2_with_arm_mjx_full_collision.xml under src/unilab/assets/robots/
+go2_arm, with quadruped meshes in the sibling go2 directory.
+The wrist housing and parallel jaws are derived from link6.obj, left.obj
+and right.obj. The meshes were simplified and quantized for web display.
 Joint transforms, original arm poses, finger pad positions, and an additional
 placement and withdrawal pose are used for the animated figure.
 The robot mesh license is reproduced in ROBOT-APACHE-2.0.txt.

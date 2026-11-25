@@ -173,3 +173,23 @@
     gap: 3px;
   }
 }
+
+.app-timeline {
+  height: 3px;
+  background: #302e3e;
+  overflow: hidden;
+}
+.app-timeline i {
+  height: 100%;
+  width: var(--app-progress, 0%);
+  display: block;
+  background: #a29cff;
+}
+#application-scene .app-viewport {
+  height: clamp(280px, 51vh, 520px);
+}
+@media (max-width: 760px) {
+  #application-scene .app-viewport {
+    height: clamp(250px, 65vw, 360px);
+  }
+}

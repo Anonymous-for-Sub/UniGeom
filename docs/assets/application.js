@@ -1,12 +1,12 @@
-import { buildScene } from "./application-scene/scene.js";
-import { createRenderer } from "./application-scene/render.js";
+import { buildScene } from "./application-scene/scene.js?v=20261126g";
+import { createRenderer } from "./application-scene/render.js?v=20261126g";
 
 const stages = [
   {
     title: "Start with familiar dynamics",
     description:
-      "In the lab, the robot carries a metal coupling. Its native encoder supplies the state that predictor B uses to anticipate the effect of each action.",
-    location: "Laboratory",
+      "In the bright workspace, the robot carries a metal coupling. Its native encoder supplies the state that predictor B uses to anticipate the effect of each action.",
+    location: "Bright workspace",
     encoder: "Native encoder B",
     bridge: "Native state",
   },
@@ -21,13 +21,15 @@ const stages = [
   {
     title: "Reuse the same predictor",
     description:
-      "In the warehouse, the arm lowers the coupling onto a fixture. The intended use is for encoder A and the fitted interface T to supply states to the same frozen predictor B during manipulation.",
-    location: "Warehouse",
+      "In the dark factory, the arm lowers the coupling onto a fixture. The intended use is for encoder A and the fitted interface T to supply states to the same frozen predictor B during manipulation.",
+    location: "Factory",
     encoder: "Source encoder A",
     bridge: "Fitted T",
   },
 ];
 const reducedTimes = [5, 18.5, 32.6];
+const duration = 26;
+const speed = 1.5;
 const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
 
 export function initApplication() {
@@ -36,16 +38,13 @@ export function initApplication() {
   const panel = root.closest("#slide-application");
   const title = document.querySelector("#application-heading"),
     description = document.querySelector("#application-description");
-  const buttons = Array.from(
-    document.querySelectorAll("[data-application-step]"),
-  );
   root.innerHTML = `<div class="app-viewport"><canvas tabindex="0" aria-label="Interactive 3D scene. Drag horizontally or use the left and right arrow keys to rotate the view."></canvas>
     <div class="app-location"><i></i><span></span></div>
     <button type="button" class="app-reset" hidden>Reset view</button>
     <p class="app-status" role="status">Loading scene…</p></div>
     <div class="app-route" aria-label="Perception and prediction path">
       <span class="app-encoder"></span><b aria-hidden="true">→</b><span class="app-bridge"><svg aria-hidden="true" viewBox="0 0 31 22" width="30" height="20"><g fill="none" stroke="#a29cff" stroke-width="1.3" pathLength="1"><path pathLength="1" d="M5 4 L26 11"/><path pathLength="1" d="M5 11 L26 18"/><path pathLength="1" d="M5 18 L26 4"/></g><g fill="#a29cff"><circle cx="4" cy="4" r="2"/><circle cx="4" cy="11" r="2"/><circle cx="4" cy="18" r="2"/></g><g fill="#a9e8d6"><circle cx="27" cy="4" r="2"/><circle cx="27" cy="11" r="2"/><circle cx="27" cy="18" r="2"/></g></svg><span class="app-bridge-text"></span></span><b aria-hidden="true">→</b>
-      <span class="app-predictor"><i aria-hidden="true"></i>Frozen predictor B</span></div>`;
+      <span class="app-predictor"><i aria-hidden="true"></i>Frozen predictor B</span></div><div class="app-timeline" aria-hidden="true"><i></i></div>`;
   const canvas = root.querySelector("canvas"),
     viewport = root.querySelector(".app-viewport");
   const location = root.querySelector(".app-location span"),
@@ -56,8 +55,7 @@ export function initApplication() {
     renderer,
     seconds = 0,
     stage = -1,
-    locallyPlaying = false,
-    localEnd = 12;
+    locallyPlaying = false;
   let handle = 0,
     lastTick = 0,
     lastFrame = -Infinity,
@@ -77,17 +75,14 @@ export function initApplication() {
     root.dataset.stage = String(i);
     if (title) title.textContent = s.title;
     if (description) description.textContent = s.description;
-    buttons.forEach((button, j) => {
-      button.setAttribute("aria-pressed", String(i === j));
-      button.classList.toggle("selected", i === j);
-    });
     location.textContent = s.location;
     root.querySelector(".app-encoder").textContent = s.encoder;
     root.querySelector(".app-bridge-text").textContent = s.bridge;
   }
   function draw(force = false) {
     if (!scene || !renderer || disposed || !visible()) return;
-    const time = mq.matches ? reducedTimes[stage] : seconds;
+    const time = mq.matches ? reducedTimes[stage] : seconds * speed;
+    root.style.setProperty("--app-progress", `${(seconds / duration) * 100}%`);
     if (!force && time === lastDrawTime) return;
     const now = performance.now();
     const fps = renderer.name === "webgl" ? 35 : 22;
@@ -122,15 +117,21 @@ export function initApplication() {
       lastTick = 0;
       return;
     }
-    if (lastTick)
-      seconds = Math.min(localEnd, seconds + (now - lastTick) / 1000);
+    if (lastTick) seconds = (seconds + (now - lastTick) / 1000) % duration;
+    select(Math.min(2, Math.floor(seconds / 8)));
     lastTick = now;
-    draw(seconds === localEnd);
-    if (seconds < localEnd) handle = requestAnimationFrame(tick);
-    else locallyPlaying = false;
+    draw();
+    handle = requestAnimationFrame(tick);
   }
   function schedule() {
-    if (!handle && locallyPlaying && visible() && !mq.matches)
+    if (
+      !handle &&
+      scene &&
+      renderer &&
+      locallyPlaying &&
+      visible() &&
+      !mq.matches
+    )
       handle = requestAnimationFrame(tick);
   }
   function pause() {
@@ -139,24 +140,25 @@ export function initApplication() {
     cancelAnimationFrame(handle);
     handle = 0;
   }
-  function setStage(i) {
+  function playFrom(value = 0) {
     pause();
-    i = clamp(Math.floor(i) || 0, 0, 2);
-    select(i);
-    seconds = i * 12;
-    localEnd = Math.min(36, (i + 1) * 12 - 0.001);
+    seconds = clamp(Number(value) || 0, 0, duration);
+    select(Math.min(2, Math.floor(seconds / 8)));
     locallyPlaying = !mq.matches;
     draw(true);
     schedule();
   }
+  function setStage(i) {
+    playFrom(clamp(i, 0, 2) * 8);
+  }
   function setProgress(value) {
     pause();
-    const time = clamp(Number(value) || 0, 0, 36),
-      i = Math.min(2, Math.floor(time / 12));
+    const time = clamp(Number(value) || 0, 0, duration),
+      i = Math.min(2, Math.floor(time / 8));
     const jump = Math.abs(time - seconds) > 0.18 || stage !== i;
     seconds = time;
     select(i);
-    draw(jump || time === 36);
+    draw(jump || time === duration);
   }
   function refresh() {
     lastTick = 0;
@@ -220,8 +222,12 @@ export function initApplication() {
   select(0);
   root.dataset.ready = "loading";
   const ready = Promise.all([
-    fetch("assets/application-scene/meshes.json").then((res) => res.json()),
-    fetch("assets/application-scene/rig.json").then((res) => res.json()),
+    fetch("assets/application-scene/meshes.json?v=20261126g").then((res) =>
+      res.json(),
+    ),
+    fetch("assets/application-scene/rig.json?v=20261126g").then((res) =>
+      res.json(),
+    ),
   ])
     .then(([meshes, rig]) => {
       if (disposed) return;
@@ -242,6 +248,7 @@ export function initApplication() {
   return {
     ready,
     setStage,
+    playFrom,
     setProgress,
     pause,
     resize,

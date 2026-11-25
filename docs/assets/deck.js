@@ -2,7 +2,7 @@ const $ = (s) => document.querySelector(s);
 const pages = [
   { id: "overview", label: "Overview", duration: 14000 },
   { id: "geometry", label: "Shared geometry", duration: 42000 },
-  { id: "application", label: "Application", duration: 36000 },
+  { id: "application", label: "Application", duration: 26000 },
   { id: "connection", label: "Framework", duration: 32000 },
   { id: "interface", label: "Interface", duration: 24000 },
   { id: "experiments", label: "Experiments", duration: 87000 },
@@ -28,11 +28,7 @@ const stops = {
     [12000, "Shared neighbors"],
     [28000, "Shared structure"],
   ],
-  application: [
-    [0, "Start with learned dynamics"],
-    [12000, "Connect new perception"],
-    [24000, "Reuse for manipulation"],
-  ],
+  application: [[0, "Continuous application demo"]],
   connection: [
     [0, "Calibrate"],
     [8000, "Resample"],
@@ -199,12 +195,12 @@ export function initDeck(api) {
         cue = `connection-${step}`;
       }
     } else if (id === "application") {
-      const step = Math.min(2, Math.floor(elapsed / 12000));
-      if (cue !== `application-${step}` || force) {
-        api.application.setStage(step);
-        cue = `application-${step}`;
+      if (cue !== "application" || force) {
+        if (previewApplication && !playing)
+          api.application.playFrom(elapsed / 1000);
+        cue = "application";
       }
-      if (playing || !previewApplication || (force && elapsed % 12000 !== 0))
+      if (playing || !previewApplication)
         api.application.setProgress(elapsed / 1000);
     } else if (id === "interface") {
       const step = Math.min(3, Math.floor(elapsed / 6000));
@@ -378,6 +374,12 @@ export function initDeck(api) {
     "pointerdown",
     (e) => {
       if (
+        e.target.closest(
+          "#application-scene canvas, #application-scene .app-reset",
+        )
+      )
+        return;
+      if (
         e.isTrusted &&
         e.target.closest("button, select, input, canvas, svg, video, a")
       )
@@ -388,19 +390,21 @@ export function initDeck(api) {
   $("#stage").addEventListener(
     "keydown",
     (e) => {
+      if (
+        e.target.closest(
+          "#application-scene canvas, #application-scene .app-reset",
+        )
+      )
+        return;
       if (e.isTrusted && playing) pause();
     },
     true,
   );
   $("#stage").addEventListener("click", (e) => {
     const b = e.target.closest(
-      "button[data-step],button[data-stage],button[data-case],button[data-geometry-step],button[data-application-step],button[data-result-view],button[data-experiment-figure]",
+      "button[data-step],button[data-stage],button[data-case],button[data-geometry-step],button[data-result-view],button[data-experiment-figure]",
     );
     if (!b) return;
-    if (b.dataset.applicationStep !== undefined) {
-      elapsed = +b.dataset.applicationStep * 12000;
-      api.application.setStage(+b.dataset.applicationStep);
-    }
     if (b.dataset.step !== undefined) elapsed = +b.dataset.step * 8000;
     if (b.dataset.geometryStep !== undefined)
       elapsed = [0, 12000, 28000][+b.dataset.geometryStep];
@@ -553,7 +557,7 @@ export function initDeck(api) {
     if (page !== 0 || explicitPause) window.geometryView?.pauseHero();
     if (pages[page].id !== "geometry" || explicitPause)
       window.geometryView?.pauseExploration();
-    sync(true);
+    if (pages[page].id === "geometry") sync(true);
   });
   window.deck = {
     go,

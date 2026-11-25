@@ -1,19 +1,19 @@
 import { Matrix4, Quaternion, Vector3 } from "./three-math.js";
-import { unpackMesh } from "./render.js";
+import { unpackMesh } from "./render.js?v=20261126g";
 
 const palette = {
-  "Satin laboratory epoxy": "#596474",
-  "Warehouse worn concrete": "#414757",
-  "Muted blue grey laboratory plaster": "#536173",
-  "Cool industrial plaster": "#454955",
+  "Satin laboratory epoxy": "#d6d5c9",
+  "Warehouse worn concrete": "#343947",
+  "Muted blue grey laboratory plaster": "#d7dedb",
+  "Cool industrial plaster": "#3c414c",
   "Concrete joint": "#363c47",
   "Black rubber": "#282d36",
   "Brushed aluminium": "#8b99ac",
   "Powder-coated steel": "#4b5465",
-  "Powder-coated white cabinet": "#a0acb6",
-  "Dark non-emissive monitor glass": "#273d4b",
+  "Powder-coated white cabinet": "#eee8dc",
+  "Dark non-emissive monitor glass": "#527b94",
   "Industrial purple polymer": "#68639c",
-  "Kraft corrugated cardboard": "#aa8b71",
+  "Kraft corrugated cardboard": "#927b64",
   "Pallet wood": "#8b715e",
   "Translucent packing tape": "#c7af96",
   "Unprinted shipping paper": "#d4cabb",
@@ -304,11 +304,16 @@ export function buildScene(meshes, rig) {
     pose(t);
     const x = baseX(t);
     const close = ramp(t, 25, 32);
+    const wide = Math.max(1 - ramp(t, 1.2, 4.2), ramp(t, 36, 39));
     const height = mix(1.9, 1.44, close);
-    const width = Math.max(height * aspect, 1.47);
+    const width = mix(Math.max(height * aspect, 1.47), 8.4, wide);
     const halfHeight = width / aspect / 2;
     const angle = mix(0.25, -0.24, close) + orbit;
-    target.set(x + mix(0.12, 0.24, close), -0.31, mix(0.58, 0.49, close));
+    target.set(
+      mix(x + mix(0.12, 0.24, close), -0.35, wide),
+      mix(-0.31, 0.12, wide),
+      mix(mix(0.58, 0.49, close), 0.65, wide),
+    );
     eye.set(
       target.x + 4 * Math.sin(angle),
       target.y - 4 * Math.cos(angle),

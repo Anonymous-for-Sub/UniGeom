@@ -29,7 +29,10 @@ void main() {
   float key = max(0.0, dot(normal, vec3(-.370, -.566, .736)));
   float fill = max(0.0, dot(normal, vec3(.702, .500, .506)));
   float rim = pow(max(0.0, dot(normal, vec3(.769, .513, .381))), 6.0);
-  lit = (color * (.52 + .52 * key + .18 * fill) + vec3(.042,.044,.066) * rim) * occlusion;
+  vec3 world = (model * vec4(p, 1.0)).xyz;
+  float lab = 1.0 - smoothstep(-.3, .3, world.x);
+  float ambient = mix(.40,.72,lab);
+  lit = (color * (ambient + mix(.50,.35,lab) * key + .10 * fill) + vec3(.042,.044,.066) * rim) * occlusion;
   gl_Position = camera * model * vec4(p, 1.0);
 }`;
 const fragment = `precision mediump float; varying vec3 lit;
@@ -161,11 +164,15 @@ function canvasRenderer(canvas) {
             ny = m[1] * u + m[5] * v + m[9] * w,
             nz = m[2] * u + m[6] * v + m[10] * w;
           const shade = mesh.shade ? mesh.shade[i] / 255 : 1;
+          const edge = Math.max(0, Math.min(1, (wx + 0.3) / 0.6));
+          const lab = 1 - edge * edge * (3 - 2 * edge);
           projected[b + 3] =
             shade *
-            (0.52 +
-              0.52 * Math.max(0, -0.37 * nx - 0.566 * ny + 0.736 * nz) +
-              0.18 * Math.max(0, 0.702 * nx + 0.5 * ny + 0.506 * nz));
+            (0.4 +
+              0.32 * lab +
+              (0.5 - 0.15 * lab) *
+                Math.max(0, -0.37 * nx - 0.566 * ny + 0.736 * nz) +
+              0.1 * Math.max(0, 0.702 * nx + 0.5 * ny + 0.506 * nz));
           projected[b + 4] =
             Math.max(0, 0.769 * nx + 0.513 * ny + 0.381 * nz) ** 6;
         }
