@@ -2,15 +2,15 @@ const $ = (s) => document.querySelector(s);
 const descriptions = [
   {
     title: "Two encoders, two coordinate systems.",
-    text: "The same 606 observations pass through two independently trained encoders. Each dot keeps its observation identity as the two projected spaces rotate.",
+    text: "The same 606 observations pass through two independent encoders. Each point keeps its identity in both spaces. Rotate the view or select an observation to follow it across the two models.",
   },
   {
-    title: "Follow the same observation through both spaces.",
-    text: "Each encoder retrieves ten neighbors using its original 192D features. The ranked lists reveal which observations are shared, even when their ranks differ.",
+    title: "Find the same neighborhood in both spaces.",
+    text: "Around the selected observation, each encoder retrieves ten neighbors in its original 192D features. Shared neighbors light up in both clouds; the links follow the same observation across them.",
   },
   {
-    title: "Look beyond one neighborhood.",
-    text: "Across three independent pairs, the encoders share 70.6–74.0% of their ten nearest neighbors on average. Each distribution includes all 606 observations.",
+    title: "Connect the local neighborhoods.",
+    text: "Keep the two spaces in view as more shared neighborhoods appear. Their coordinates differ, but several local relationships recur. Choose another model pair to see how much of this structure persists.",
   },
 ];
 export function initPaperViews() {
@@ -36,10 +36,33 @@ export function initPaperViews() {
     $("#geometry-cohort").hidden = step !== 2;
     $("#slide-geometry .chapter-copy>.footnote").hidden = step !== 0;
     $("#geometry-hint").textContent = [
-      "Drag to rotate the projected spaces. Each point is one recorded observation.",
-      "Matching observations are linked across ranked neighbor lists. Select a new query to compare.",
-      "Shared neighbors out of ten · hover or tap a bar to inspect the observation count.",
+      "Drag either space to rotate both. Select a point to follow the same observation.",
+      "Purple points are shared neighbors. Select a point or thumbnail to inspect another neighborhood.",
+      "Additional neighborhoods appear in the same two spaces. Drag to inspect; change the model pair to compare.",
     ][step];
+    $("#geometry-legend").innerHTML =
+      step === 0
+        ? "606 observations in each space"
+        : '<i class="legend-dot violet"></i> Shared neighbor <i class="legend-dot teal"></i> B only <i class="legend-dot sand"></i> A only';
+    const view = window.geometryView;
+    if (view && !$("#geometry-pair-summary").children.length) {
+      view.data.pairs.forEach((p, i) => {
+        const b = document.createElement("button");
+        b.className = "pair-summary";
+        b.innerHTML = `<span>Pair ${i + 1}</span><strong>${(p.mean * 100).toFixed(1)}%</strong>`;
+        b.dataset.pair = i;
+        b.onclick = () => {
+          const select = $("#geometry-pair");
+          select.value = String(i);
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+        };
+        $("#geometry-pair-summary").append(b);
+      });
+    }
+    document.querySelectorAll(".pair-summary").forEach((b) => {
+      b.classList.toggle("selected", +b.dataset.pair === view?.pair);
+      b.setAttribute("aria-pressed", +b.dataset.pair === view?.pair);
+    });
     window.geometryView?.setExplorationStep(step);
   }
   function zoom(value) {
@@ -137,6 +160,13 @@ export function initPaperViews() {
     if (e.target === dialog) dialog.close();
   });
   $("#figure-zoom").oninput = (e) => zoom(+e.target.value);
+  $("#geometry-pair").addEventListener("change", () => {
+    document.querySelectorAll(".pair-summary").forEach((b) => {
+      const active = +b.dataset.pair === +$("#geometry-pair").value;
+      b.classList.toggle("selected", active);
+      b.setAttribute("aria-pressed", active);
+    });
+  });
   window.addEventListener("geometryready", () => selectGeometry(step));
   selectGeometry(0);
   const ready = fetch("assets/paper-figures/manifest.json")

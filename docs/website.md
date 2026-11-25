@@ -1,18 +1,18 @@
 # UniGeom project page
 
-A static six-chapter presentation, served from `docs/`: Overview, Shared geometry, Framework, Interface, Results and Experiments. Develop with `python3 -m http.server 8000 --directory docs` from the repository root. The downloadable review package includes a separately bundled offline entry.
+A static six-chapter presentation, served from `docs/`: Overview, Shared geometry, Framework, Interface, Experiments and Results. Develop with `python3 -m http.server 8000 --directory docs` from the repository root. The downloadable review package includes a separately bundled offline entry.
 
 ## A continuous explanation
 
-Shared geometry changes its actual visual representation across three stages. Two independently trained encoders first display their separate projected spaces. The next stage shows ranked nearest-neighbor lists, connecting the same observations across encoders. Finally, three animated histograms count all observations in each independent model pair. These use measured data, not synthetic point arrangements presented as measurements.
+Shared geometry keeps the same two measured point clouds visible throughout all three stages. The first stage introduces their independent coordinates. The second highlights the selected observation and its actual ten-neighbor sets, with cross-space links for shared observation IDs. The third progressively adds a small set of shared anchor neighborhoods in those same clouds. Camera gestures, point selection and observation thumbnails remain available; changing the model pair interpolates the displayed positions while keeping observation identities. Full-cohort means are shown beside the spaces. No ranked-list or histogram replacement interrupts the spatial explanation.
 
 The framework is one native SVG, drawn with web text, paths, grids and flow animation. Its topology follows the manuscript: source history and goal, the shared learned interface, frozen dynamics, goal cost, residual spatial resampling and the paired-state calibration inset. Four stages highlight calibration, the bilinear base, residual correction and frozen rollout. Shape labels use 256 source tokens × 192 channels, consistent with the method equation. The separate interface chapter computes a teaching example of the spatial operation.
 
-Manuscript evidence appears where it supports the explanation. Prediction controls and calibration budgets sit within Results. Matched task comparisons, Granular/RoboTwin readouts and driving scenarios sit within Experiments beside the recorded executions. There is no separate figure catalog or manuscript chapter.
+Manuscript evidence appears where it supports the explanation. Prediction controls and calibration budgets sit within Results. Matched task comparisons, Granular/RoboTwin readouts and driving scenarios sit within Experiments beside the recorded executions. Experiments precedes Results so recorded behavior introduces the complete-cohort comparisons. There is no separate figure catalog or manuscript chapter.
 
 ## Evidence
 
-- `assets/data/geometry.json`: 606 observations per independent LeWM pair; three pairs. Retrieval uses original 192D features. Separate t-SNE projections and a rigid display registration provide the rotating 3D layouts. Display motion does not alter measured neighbors. Ranked-list links match actual observation IDs. Histograms count all 606 measured overlaps per pair.
+- `assets/data/geometry.json`: 606 observations per independent LeWM pair; three pairs. Retrieval uses original 192D features. Separate t-SNE projections and a rigid display registration provide the rotating 3D layouts. Display motion does not alter measured neighbors. Local and cross-space links use actual observation IDs and original-space neighbor sets. Anchor neighborhoods are a sparse illustration; pair means include all 606 observations.
 - `assets/images/observations.webp`: sprite of those observations; 32 columns with unused slots in the last row.
 - `assets/data/results.json`: complete-cohort means and paired native-success retention. Available method comparisons remain intact.
 - `assets/videos/`: five original recorded comparisons and posters, preserving all frames, native speed and original time windows. Selected cases are distinguished from cohort statistics.

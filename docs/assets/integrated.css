@@ -43,14 +43,6 @@
 .problem-inset span {
   font-size: 13px;
 }
-.geometry-stage[data-geometry-phase="1"] .cloud-labels,
-.geometry-stage[data-geometry-phase="2"] .cloud-labels,
-.geometry-stage[data-geometry-phase="1"] .neighbor-strip,
-.geometry-stage[data-geometry-phase="2"] .neighbor-strip,
-.geometry-stage[data-geometry-phase="1"] .stage-top,
-.geometry-stage[data-geometry-phase="2"] .stage-top {
-  display: none;
-}
 .results-stage {
   display: flex;
   flex-direction: column;
@@ -293,4 +285,49 @@
   #results-evidence img {
     height: 320px;
   }
+}
+
+#geometry-pair-summary {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0;
+}
+.pair-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: 1px solid #333340;
+  border-radius: 8px;
+  padding: 10px 12px;
+  width: 100%;
+  color: #c8c7d6;
+}
+.pair-summary.selected {
+  background: #242231;
+  border-color: #9b8de3;
+  color: #e7e0ff;
+}
+.pair-summary strong {
+  font-size: 18px;
+  font-weight: 550;
+}
+.geometry-stage #geometry-legend {
+  min-height: 21px;
+}
+@media (max-height: 820px) and (min-width: 1100px) {
+  #geometry-pair-summary {
+    gap: 5px;
+    margin: 12px 0;
+  }
+  .pair-summary {
+    padding: 7px 10px;
+  }
+}
+/* Keep observation browsing available while introducing the two spaces. */
+.geometry-stage[data-geometry-phase="0"] .neighbor-strip {
+  visibility: visible;
+}
+.geometry-stage[data-geometry-phase="0"] .neighbor-strip button {
+  border-color: #414151;
 }

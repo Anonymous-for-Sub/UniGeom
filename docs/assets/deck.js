@@ -4,8 +4,8 @@ const pages = [
   { id: "geometry", label: "Shared geometry", duration: 42000 },
   { id: "connection", label: "Framework", duration: 32000 },
   { id: "interface", label: "Interface", duration: 24000 },
-  { id: "results", label: "Results", duration: 48000 },
   { id: "experiments", label: "Experiments", duration: 87000 },
+  { id: "results", label: "Results", duration: 48000 },
 ];
 const offsets = pages.map((_, i) =>
   pages.slice(0, i).reduce((s, p) => s + p.duration, 0),
@@ -129,7 +129,7 @@ export function initDeck(api) {
         step === 2 ? Math.min(2, Math.floor((elapsed - 28000) / 4600)) : 0;
       if (cue !== `geometry-${step}-${index}` || force) {
         api.paperViews.selectGeometry(step);
-        if (window.geometryView) {
+        if (window.geometryView && step === 2) {
           const select = $("#geometry-pair");
           select.value = String(index);
           select.dispatchEvent(new Event("change"));
