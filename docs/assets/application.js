@@ -1,11 +1,11 @@
-import { buildScene } from "./application-scene/scene.js?v=20261126g";
-import { createRenderer } from "./application-scene/render.js?v=20261126g";
+import { buildScene } from "./application-scene/scene.js?v=20261126h";
+import { createRenderer } from "./application-scene/render.js?v=20261126h";
 
 const stages = [
   {
     title: "Start with familiar dynamics",
     description:
-      "In the bright workspace, the robot carries a metal coupling. Its native encoder supplies the state that predictor B uses to anticipate the effect of each action.",
+      "The robot carries a coupling through a bright workspace. Its native encoder supplies states to the existing predictor.",
     location: "Bright workspace",
     encoder: "Native encoder B",
     bridge: "Native state",
@@ -13,7 +13,7 @@ const stages = [
   {
     title: "Connect a new visual encoder",
     description:
-      "At the doorway, the shelves and lighting change. Before use, common observations from both encoders are used to fit an interface T that maps encoder A’s features into predictor B’s native state space.",
+      "Common observations calibrate the interface before use. Encoder A can then supply states in the frozen predictor’s coordinates.",
     location: "Doorway",
     encoder: "Source encoder A",
     bridge: "Calibrate T",
@@ -21,7 +21,7 @@ const stages = [
   {
     title: "Reuse the same predictor",
     description:
-      "In the dark factory, the arm lowers the coupling onto a fixture. The intended use is for encoder A and the fitted interface T to supply states to the same frozen predictor B during manipulation.",
+      "In the factory, the robot places the coupling. The interface changes how it sees the scene; the predictor remains frozen.",
     location: "Factory",
     encoder: "Source encoder A",
     bridge: "Fitted T",
@@ -47,6 +47,12 @@ export function initApplication() {
       <span class="app-predictor"><i aria-hidden="true"></i>Frozen predictor B</span></div><div class="app-timeline" aria-hidden="true"><i></i></div>`;
   const canvas = root.querySelector("canvas"),
     viewport = root.querySelector(".app-viewport");
+  const caption = panel.querySelector(".chapter-copy");
+  if (caption) {
+    caption.className = "app-caption";
+    caption.prepend(root.querySelector(".app-location"));
+    viewport.append(caption);
+  }
   const location = root.querySelector(".app-location span"),
     status = root.querySelector(".app-status");
   const reset = root.querySelector(".app-reset");
@@ -85,7 +91,7 @@ export function initApplication() {
     root.style.setProperty("--app-progress", `${(seconds / duration) * 100}%`);
     if (!force && time === lastDrawTime) return;
     const now = performance.now();
-    const fps = renderer.name === "webgl" ? 35 : 22;
+    const fps = renderer.name === "webgl" ? 35 : 18;
     if (!force && now - lastFrame < 1000 / fps) return;
     lastDrawTime = time;
     lastFrame = now;
@@ -222,10 +228,10 @@ export function initApplication() {
   select(0);
   root.dataset.ready = "loading";
   const ready = Promise.all([
-    fetch("assets/application-scene/meshes.json?v=20261126g").then((res) =>
+    fetch("assets/application-scene/meshes.json?v=20261126h").then((res) =>
       res.json(),
     ),
-    fetch("assets/application-scene/rig.json?v=20261126g").then((res) =>
+    fetch("assets/application-scene/rig.json?v=20261126h").then((res) =>
       res.json(),
     ),
   ])

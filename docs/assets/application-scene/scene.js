@@ -1,5 +1,5 @@
 import { Matrix4, Quaternion, Vector3 } from "./three-math.js";
-import { unpackMesh } from "./render.js?v=20261126g";
+import { unpackMesh } from "./render.js?v=20261126h";
 
 const palette = {
   "Satin laboratory epoxy": "#d6d5c9",
@@ -198,7 +198,22 @@ function cylinder(radius, height, segments = 30) {
     indices: new Uint16Array(indices),
   };
 }
-const disc = cylinder(1, 0.0001, 48);
+const disc = (() => {
+  const positions = [0, 0, 0],
+    normals = [0, 0, 1],
+    indices = [];
+  for (let i = 0; i < 48; i++) {
+    const a = (i * Math.PI * 2) / 48;
+    positions.push(Math.cos(a), Math.sin(a), 0);
+    normals.push(0, 0, 1);
+    indices.push(0, i + 1, ((i + 1) % 48) + 1);
+  }
+  return {
+    positions: new Float32Array(positions),
+    normals: new Float32Array(normals),
+    indices: new Uint16Array(indices),
+  };
+})();
 const makeItem = (mesh, hex) => ({
   mesh,
   transform: new Matrix4(),
@@ -226,7 +241,7 @@ export function buildScene(meshes, rig) {
   });
   const part = makeItem(cylinder(0.0115, 0.055), "#ccd5df");
   const band = makeItem(cylinder(0.012, 0.016), "#8af0d9");
-  const shadows = Array.from({ length: 8 }, () => makeItem(disc, "#38404f"));
+  const shadows = Array.from({ length: 8 }, () => makeItem(disc, "#000000"));
   objects.push(...shadows, part, band);
   const left = vector(rig.pad.p),
     right = vector(rig.otherPad.p);
@@ -279,17 +294,12 @@ export function buildScene(meshes, rig) {
       part.transform.compose(pos, qa, units);
     } else part.transform.copy(placed);
     band.transform.copy(part.transform);
-    const floor = rgb(
-      x < 0
-        ? palette["Satin laboratory epoxy"]
-        : palette["Warehouse worn concrete"],
-    );
     shadows.forEach((item, j) => {
       const f = j / (shadows.length - 1);
       pos.set(x - 0.02, -0.53, 0.009 + f * 0.0008);
       factor.set(0.51 - 0.19 * f, 0.25 - 0.095 * f, 1);
       item.transform.compose(pos, identityQuaternion, factor);
-      item.rgb = floor.map((c) => c * (0.96 - 0.37 * f * f * (3 - 2 * f)));
+      item.opacity = 0.025 + 0.06 * f * f;
     });
   }
   pose(33.18);

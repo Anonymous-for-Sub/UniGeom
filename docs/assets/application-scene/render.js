@@ -35,8 +35,8 @@ void main() {
   lit = (color * (ambient + mix(.50,.35,lab) * key + .10 * fill) + vec3(.042,.044,.066) * rim) * occlusion;
   gl_Position = camera * model * vec4(p, 1.0);
 }`;
-const fragment = `precision mediump float; varying vec3 lit;
-void main() { gl_FragColor = vec4(lit, 1.0); }`;
+const fragment = `precision mediump float; varying vec3 lit; uniform float opacity;
+void main() { gl_FragColor = vec4(lit, opacity); }`;
 
 function glRenderer(gl) {
   const shaders = [gl.VERTEX_SHADER, gl.FRAGMENT_SHADER].map((type, i) => {
@@ -60,6 +60,14 @@ function glRenderer(gl) {
   const camera = gl.getUniformLocation(program, "camera");
   const model = gl.getUniformLocation(program, "model"),
     color = gl.getUniformLocation(program, "color");
+  const alpha = gl.getUniformLocation(program, "opacity");
+  gl.enable(gl.BLEND);
+  gl.blendFuncSeparate(
+    gl.SRC_ALPHA,
+    gl.ONE_MINUS_SRC_ALPHA,
+    gl.ONE,
+    gl.ONE_MINUS_SRC_ALPHA,
+  );
   gl.enableVertexAttribArray(p);
   gl.enableVertexAttribArray(n);
   gl.enable(gl.DEPTH_TEST);
@@ -78,7 +86,7 @@ function glRenderer(gl) {
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       gl.uniformMatrix4fv(camera, false, view.elements);
-      for (const { mesh, transform, rgb } of items) {
+      for (const { mesh, transform, rgb, opacity = 1 } of items) {
         if (!meshes.has(mesh))
           meshes.set(mesh, [
             buffer(mesh.positions, gl.ARRAY_BUFFER),
@@ -102,6 +110,7 @@ function glRenderer(gl) {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices);
         gl.uniformMatrix4fv(model, false, transform.elements);
         gl.uniform3fv(color, rgb);
+        gl.uniform1f(alpha, opacity);
         gl.drawElements(
           gl.TRIANGLES,
           mesh.indices.length,
@@ -126,7 +135,7 @@ function canvasRenderer(canvas) {
     projected = new Float32Array(0);
   return {
     name: "canvas2d",
-    pixelRatio: (width) => Math.min(1, 760 / width),
+    pixelRatio: (width) => Math.min(1.25, 1000 / width),
     draw(view, items) {
       const { width, height } = canvas;
       if (!image || image.width !== width || image.height !== height) {
@@ -137,7 +146,7 @@ function canvasRenderer(canvas) {
       depth.fill(Infinity);
       pixels.fill(0);
       const vp = view.elements;
-      for (const { mesh, transform, rgb } of items) {
+      for (const { mesh, transform, rgb, opacity = 1 } of items) {
         const m = transform.elements;
         const { positions, normals, indices } = mesh;
         const count = positions.length / 3;
@@ -174,7 +183,7 @@ function canvasRenderer(canvas) {
                 Math.max(0, -0.37 * nx - 0.566 * ny + 0.736 * nz) +
               0.1 * Math.max(0, 0.702 * nx + 0.5 * ny + 0.506 * nz));
           projected[b + 4] =
-            Math.max(0, 0.769 * nx + 0.513 * ny + 0.381 * nz) ** 6;
+            shade * Math.max(0, 0.769 * nx + 0.513 * ny + 0.381 * nz) ** 6;
         }
         for (let k = 0; k < indices.length; k += 3) {
           const a = indices[k] * 5,
@@ -200,17 +209,12 @@ function canvasRenderer(canvas) {
           const az = projected[a + 2],
             bz = projected[b + 2] - az,
             cz = projected[c + 2] - az;
-          const light =
-            (projected[a + 3] + projected[b + 3] + projected[c + 3]) / 3;
-          const rim =
-            (projected[a + 4] + projected[b + 4] + projected[c + 4]) / 3;
-          const channel = (i, r) =>
-            Math.min(255, Math.round(255 * (rgb[i] * light + r * rim)));
-          const packed =
-            0xff000000 |
-            (channel(2, 0.066) << 16) |
-            (channel(1, 0.044) << 8) |
-            channel(0, 0.042);
+          const la = projected[a + 3],
+            lb = projected[b + 3] - la,
+            lc = projected[c + 3] - la;
+          const ra = projected[a + 4],
+            rb = projected[b + 4] - ra,
+            rc = projected[c + 4] - ra;
           for (let py = y0; py <= y1; py++) {
             const dy = py + 0.5 - ay,
               dx = x0 + 0.5 - ax;
@@ -222,7 +226,32 @@ function canvasRenderer(canvas) {
                 j = py * width + px;
               if (z >= depth[j]) continue;
               depth[j] = z;
-              pixels[j] = packed;
+              const light = la + u * lb + v * lc,
+                rim = ra + u * rb + v * rc;
+              let red = Math.min(
+                255,
+                Math.round(255 * (rgb[0] * light + 0.042 * rim)),
+              );
+              let green = Math.min(
+                255,
+                Math.round(255 * (rgb[1] * light + 0.044 * rim)),
+              );
+              let blue = Math.min(
+                255,
+                Math.round(255 * (rgb[2] * light + 0.066 * rim)),
+              );
+              if (opacity < 1) {
+                const below = pixels[j],
+                  inv = 1 - opacity;
+                red = Math.round(red * opacity + (below & 255) * inv);
+                green = Math.round(
+                  green * opacity + ((below >>> 8) & 255) * inv,
+                );
+                blue = Math.round(
+                  blue * opacity + ((below >>> 16) & 255) * inv,
+                );
+              }
+              pixels[j] = 0xff000000 | (blue << 16) | (green << 8) | red;
             }
           }
         }

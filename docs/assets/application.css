@@ -193,3 +193,184 @@
     height: clamp(250px, 65vw, 360px);
   }
 }
+
+/* The application is a single immersive canvas rather than a sidebar layout. */
+#slide-application:not([hidden]) {
+  display: block;
+  max-width: 1800px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+#slide-application > .chapter-copy {
+  display: none;
+}
+#slide-application .application-stage {
+  height: 100%;
+  display: block;
+}
+#application-scene {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  border-color: #686374;
+}
+#application-scene .app-viewport {
+  height: auto;
+  min-height: 0;
+  flex: 1;
+  background: radial-gradient(
+    ellipse at 28% 0%,
+    #c4bfb5 0%,
+    #a6a5ab 52%,
+    #828c99 100%
+  );
+}
+#application-scene .app-viewport::before {
+  content: "";
+  position: absolute;
+  left: 14%;
+  right: 8%;
+  bottom: 4%;
+  height: 18%;
+  background: #35304133;
+  border-radius: 50%;
+  filter: blur(26px);
+  pointer-events: none;
+}
+.app-caption {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  width: min(340px, calc(100% - 44px));
+  padding: 19px 22px 15px;
+  border: 1px solid #c4b6e62e;
+  border-radius: 12px;
+  background: linear-gradient(125deg, #1e1c2aee, #232331df);
+  box-shadow: 0 8px 30px #11101b20;
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+  z-index: 2;
+}
+#application-scene .app-caption .app-location {
+  position: static;
+  display: flex;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #c9c4da;
+  margin: 0 0 10px;
+}
+.app-caption h2 {
+  font-size: 25px;
+  line-height: 1.22;
+  font-weight: 550;
+  letter-spacing: -0.65px;
+  margin: 0 0 11px;
+  color: #f1edf9;
+}
+.app-caption > p {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #d0cbdc;
+  margin: 0;
+}
+.app-caption > .footnote {
+  font-size: 10px;
+  color: #9f98b1;
+  margin: 13px 0 0;
+}
+#application-scene .app-reset {
+  top: 20px;
+  right: 20px;
+  z-index: 3;
+  background: #252330db;
+}
+#application-scene .app-route {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  background: #1c1a25;
+}
+#application-scene .app-timeline {
+  flex-shrink: 0;
+}
+@media (max-width: 800px) {
+  #slide-application:not([hidden]) {
+    padding: 10px;
+    max-width: none;
+  }
+  #application-scene {
+    border-radius: 13px;
+  }
+  .app-caption {
+    top: 12px;
+    left: 12px;
+    width: min(300px, calc(100% - 24px));
+    padding: 13px 16px 11px;
+  }
+  .app-caption h2 {
+    font-size: 21px;
+    line-height: 1.22;
+    margin-bottom: 8px;
+  }
+  .app-caption > p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .app-caption > .footnote {
+    margin-top: 8px;
+    font-size: 9px;
+  }
+  #application-scene .app-caption .app-location {
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+  #application-scene .app-reset {
+    top: auto;
+    bottom: 12px;
+    right: 12px;
+    font-size: 11px;
+  }
+  #application-scene .app-route {
+    padding: 10px 7px;
+  }
+}
+@media (min-width: 801px) and (max-height: 740px) {
+  .app-caption {
+    top: 16px;
+    left: 16px;
+    padding: 14px 18px;
+    width: 310px;
+  }
+  .app-caption h2 {
+    font-size: 22px;
+  }
+  .app-caption > p {
+    font-size: 12px;
+  }
+}
+@media (max-height: 560px) {
+  .app-caption {
+    top: 8px;
+    left: 8px;
+    width: auto;
+    max-width: calc(100% - 130px);
+    padding: 9px 13px;
+  }
+  .app-caption h2 {
+    font-size: 18px;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+  .app-caption > p:not(.footnote),
+  #application-scene .app-caption .app-location {
+    display: none;
+  }
+  .app-caption > .footnote {
+    font-size: 8px;
+    margin: 4px 0 0;
+  }
+}
