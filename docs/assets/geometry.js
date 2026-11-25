@@ -1,9 +1,9 @@
 const colors = {
-  purple: "#8080ff",
-  deep: "#5751b9",
-  teal: "#397f7d",
-  sand: "#b69a79",
-  ink: "#262538",
+  purple: "#9995ff",
+  deep: "#c6c3ff",
+  teal: "#68c5b4",
+  sand: "#d4b590",
+  ink: "#f2f0ff",
 };
 const mean = (arr) => arr.reduce((s, x) => s + x, 0) / arr.length;
 
@@ -18,14 +18,37 @@ export class GeometryView {
     this.drag = null;
     this.canvas = document.querySelector("#geometry-cloud");
     this.hero = document.querySelector("#hero-cloud");
-    this.reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this.motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
+    this.reduced = this.motionPreference.matches;
+    this.normalized = new WeakMap();
     this.heroVisible = true;
+    this.heroPaused = false;
+    this.frame = null;
     this.phase = 0;
+    const heroPair = data.pairs[0];
+    this.heroQuery = heroPair.example;
+    this.heroShared = heroPair.neighborsA[this.heroQuery].filter((id) =>
+      heroPair.neighborsB[this.heroQuery].includes(id),
+    );
+    this.heroFocus = new Set([this.heroQuery, ...this.heroShared]);
+    // Center and uniformly scale each measured projection independently.
+    // These display transforms do not align the two representation spaces.
+    this.heroClouds = [this.normalize(heroPair.a), this.normalize(heroPair.b)];
+    this.motionPreference.addEventListener("change", (event) => {
+      this.reduced = event.matches;
+      this.stopHero();
+      this.startHero();
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) this.stopHero();
+      else this.startHero();
+    });
     new ResizeObserver(() => this.render()).observe(this.canvas);
     new ResizeObserver(() => this.drawHero()).observe(this.hero);
     new IntersectionObserver(([entry]) => {
       this.heroVisible = entry.isIntersecting;
       if (this.heroVisible) this.startHero();
+      else this.stopHero();
     }).observe(this.hero);
     this.canvas.addEventListener("pointerdown", (e) => {
       this.drag = {
@@ -130,18 +153,28 @@ export class GeometryView {
     const r = canvas.getBoundingClientRect();
     if (!r.width || !r.height) return null;
     const dpr = Math.min(devicePixelRatio || 1, 2);
-    canvas.width = Math.round(r.width * dpr);
-    canvas.height = Math.round(r.height * dpr);
+    const width = Math.round(r.width * dpr);
+    const height = Math.round(r.height * dpr);
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
     const ctx = canvas.getContext("2d");
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, r.width, r.height);
     return { ctx, w: r.width, h: r.height };
   }
   normalize(points) {
+    if (this.normalized.has(points)) return this.normalized.get(points);
     const c = [0, 1, 2].map((j) => mean(points.map((p) => p[j])));
     const radius = Math.max(
       ...points.map((p) => Math.hypot(...p.map((v, j) => v - c[j]))),
     );
-    return points.map((p) => p.map((v, j) => (v - c[j]) / radius));
+    const normalized = points.map((p) =>
+      p.map((v, j) => (v - c[j]) / (radius || 1)),
+    );
+    this.normalized.set(points, normalized);
+    return normalized;
   }
   project(p, cx, cy, scale, yaw = this.yaw, pitch = this.pitch) {
     const x = p[0] * Math.cos(yaw) + p[2] * Math.sin(yaw),
@@ -184,7 +217,7 @@ export class GeometryView {
       }));
       this.points.push(...pts);
       // Common view rotation, independent original 3D coordinates.
-      ctx.strokeStyle = "#ddd9ea";
+      ctx.strokeStyle = "#454451";
       ctx.lineWidth = 0.7;
       [
         [-1, -0.95, -0.8],
@@ -209,7 +242,7 @@ export class GeometryView {
             ctx,
             q,
             1.8 + (q.z + 1) * 0.35,
-            j ? "#81b2aa65" : "#a8a0d075",
+            j ? "#68c5b47a" : "#9995ff8c",
           ),
         );
       const ids = j ? p.neighborsB[this.query] : p.neighborsA[this.query];
@@ -236,7 +269,7 @@ export class GeometryView {
             ? colors.teal
             : colors.sand;
         this.dot(ctx, pts[id], 5.2, color, !shared.has(id));
-        ctx.strokeStyle = "#ffffff";
+        ctx.strokeStyle = "#15151d";
         ctx.lineWidth = 0.8;
         ctx.stroke();
       });
@@ -251,70 +284,167 @@ export class GeometryView {
       .querySelectorAll("#neighbor-strip button")
       .forEach((el, i) => this.sprite(el, p.neighborsA[this.query][i]));
   }
+  projectCloud(points, cx, cy, scale, yaw, pitch) {
+    const cosY = Math.cos(yaw),
+      sinY = Math.sin(yaw);
+    const cosP = Math.cos(pitch),
+      sinP = Math.sin(pitch);
+    return points.map((p, id) => {
+      const x = p[0] * cosY + p[2] * sinY;
+      const z = -p[0] * sinY + p[2] * cosY;
+      const depth = p[1] * sinP + z * cosP;
+      const perspective = 3.8 / (3.8 - depth);
+      return {
+        id,
+        x: cx + x * scale * perspective,
+        y: cy + (p[1] * cosP - z * sinP) * scale * perspective,
+        z: depth,
+      };
+    });
+  }
   drawHero() {
     const setup = this.setup(this.hero);
     if (!setup) return;
-    const { ctx, w, h } = setup,
-      p = this.data.pairs[0];
-    const positions = [];
-    ["a", "b"].forEach((side, j) => {
-      const pts = this.normalize(p[side]);
-      positions[j] = pts.map((v) =>
-        this.project(
-          v,
-          w * (j ? 0.66 : 0.34),
-          h * (j ? 0.69 : 0.3),
-          Math.min(w * 0.39, h * 0.3),
-          -0.35 + this.phase,
-          0.32,
-        ),
+    const { ctx, w, h } = setup;
+    const scale = Math.min(w * 0.37, h * 0.29);
+    const centers = [
+      [w * 0.32, h * 0.32],
+      [w * 0.68, h * 0.67],
+    ];
+    const yaw = -0.35 + Math.sin(this.phase * 0.6) * 0.42;
+    const pitch = 0.29 + Math.sin(this.phase * 0.4) * 0.09;
+    const positions = this.heroClouds.map((points, j) =>
+      this.projectCloud(points, ...centers[j], scale, yaw, pitch),
+    );
+
+    // Soft lighting is decorative; every visible dot below is a measured point.
+    centers.forEach(([x, y], j) => {
+      const halo = ctx.createRadialGradient(x, y, 0, x, y, scale * 1.35);
+      halo.addColorStop(0, j ? "#68c5b412" : "#9995ff19");
+      halo.addColorStop(0.5, j ? "#68c5b407" : "#9995ff09");
+      halo.addColorStop(1, "#10101400");
+      ctx.fillStyle = halo;
+      ctx.fillRect(
+        x - scale * 1.35,
+        y - scale * 1.35,
+        scale * 2.7,
+        scale * 2.7,
       );
     });
-    for (let id = 0; id < 606; id += 34) {
-      ctx.strokeStyle = "#9b95dc35";
-      ctx.lineWidth = 0.7;
+
+    // Join only identical observation IDs in the measured k-NN intersection.
+    // These curves communicate observation identity, not geometric alignment.
+    this.heroShared.forEach((id, i) => {
+      const a = positions[0][id],
+        b = positions[1][id];
+      const emphasis = this.reduced
+        ? 0.5
+        : 0.5 + 0.5 * Math.sin(this.phase * 2 - i * 0.6);
+      const gradient = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+      gradient.addColorStop(0, "#9995ff");
+      gradient.addColorStop(0.52, "#a3b5d7");
+      gradient.addColorStop(1, "#68c5b4");
+      ctx.globalAlpha = 0.12 + emphasis * 0.16;
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = w < 450 ? 0.75 : 1;
       ctx.beginPath();
-      ctx.moveTo(positions[0][id].x, positions[0][id].y);
+      ctx.moveTo(a.x, a.y);
       ctx.bezierCurveTo(
-        w * 0.3,
-        h * 0.5,
-        w * 0.7,
-        h * 0.49,
-        positions[1][id].x,
-        positions[1][id].y,
+        a.x + w * 0.16,
+        a.y + h * 0.12,
+        b.x - w * 0.16,
+        b.y - h * 0.12,
+        b.x,
+        b.y,
       );
       ctx.stroke();
-    }
-    positions.forEach((pts, j) => {
-      pts
-        .map((p, id) => ({ ...p, id }))
-        .sort((a, b) => a.z - b.z)
-        .forEach((q) => {
-          const focus = p.neighborsA[15].includes(q.id) || q.id === 15;
-          this.dot(
-            ctx,
-            q,
-            focus ? 3.7 : 1.4 + (q.z + 1) * 0.7,
-            focus
-              ? j
-                ? colors.teal
-                : colors.deep
-              : j
-                ? "#5b9f9675"
-                : "#9990dd85",
-          );
-        });
+    });
+    ctx.globalAlpha = 1;
+
+    positions.forEach((points, j) => {
+      const color = j ? colors.teal : colors.purple;
+      const query = points[this.heroQuery];
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 0.65;
+      ctx.globalAlpha = 0.26;
+      this.heroShared.forEach((id) => {
+        ctx.beginPath();
+        ctx.moveTo(query.x, query.y);
+        ctx.lineTo(points[id].x, points[id].y);
+        ctx.stroke();
+      });
+      const sorted = [...points].sort((a, b) => a.z - b.z);
+      sorted.forEach((point) => {
+        if (this.heroFocus.has(point.id)) return;
+        const depth = Math.max(0, Math.min(1, (point.z + 1) / 2));
+        ctx.globalAlpha = 0.22 + depth * 0.66;
+        this.dot(ctx, point, (w < 450 ? 0.8 : 1) + depth * 1.15, color);
+      });
+      ctx.globalAlpha = 1;
+      this.heroShared.forEach((id) => {
+        const point = points[id];
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 9;
+        this.dot(ctx, point, w < 450 ? 2.6 : 3.1, color);
+        ctx.shadowBlur = 0;
+        this.dot(ctx, point, 1, j ? "#d5fff3" : "#e5e2ff");
+      });
+      ctx.strokeStyle = j ? "#b0eadc" : "#c6c3ff";
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.7;
+      ctx.beginPath();
+      ctx.arc(query.x, query.y, w < 450 ? 6.5 : 8, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 12;
+      this.dot(ctx, query, 3.3, colors.ink);
+      ctx.shadowBlur = 0;
     });
   }
+  stopHero() {
+    if (this.frame !== null) cancelAnimationFrame(this.frame);
+    this.frame = null;
+    this.lastHeroFrame = null;
+  }
+  pauseHero() {
+    this.heroPaused = true;
+    this.stopHero();
+  }
+  resumeHero() {
+    this.heroPaused = false;
+    this.startHero();
+  }
   startHero() {
-    if (this.frame) return;
-    const tick = () => {
+    if (
+      this.frame !== null ||
+      this.heroPaused ||
+      !this.heroVisible ||
+      document.hidden
+    )
+      return;
+    this.drawHero();
+    if (this.reduced) return;
+    this.lastHeroFrame = null;
+    const tick = (time) => {
       this.frame = null;
-      if (!this.heroVisible || document.hidden) return;
-      if (!this.reduced) this.phase += 0.0012;
-      this.drawHero();
-      if (!this.reduced) this.frame = requestAnimationFrame(tick);
+      if (
+        this.heroPaused ||
+        !this.heroVisible ||
+        document.hidden ||
+        this.reduced
+      )
+        return;
+      if (this.lastHeroFrame === null) this.lastHeroFrame = time;
+      const elapsed = time - this.lastHeroFrame;
+      // Thirty drawn frames per second is sufficient for the slow camera drift.
+      if (elapsed >= 1000 / 30) {
+        this.phase += Math.min(elapsed, 100) * 0.00011;
+        this.lastHeroFrame = time;
+        this.drawHero();
+      }
+      this.frame = requestAnimationFrame(tick);
     };
-    tick();
+    this.frame = requestAnimationFrame(tick);
   }
 }

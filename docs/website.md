@@ -2,7 +2,9 @@
 
 The project page is a static site served from `docs/` on the `main` branch through GitHub Pages. Open `index.html` through a local HTTP server when developing, for example `python3 -m http.server 8000 --directory docs` from the repository root.
 
-The interactive page includes shared-neighborhood exploration, a perception-to-dynamics connection diagram, a computed spatial-resampling illustration, full-cohort result comparisons and five recorded matched-task videos.
+The dark presentation has seven pages: overview, shared geometry, connection, interface, results, recorded experiments and paper. It includes shared-neighborhood exploration, a perception-to-dynamics connection diagram, a computed spatial-resampling illustration, full-cohort result comparisons and five recorded matched-task videos.
+
+The header contains chapter navigation, without a brand mark. Previous/next buttons, keyboard navigation and horizontal touch gestures switch pages. Auto play runs a silent 3 minute 15 second tour; its shared timeline advances method steps, interface stages, evaluation cohorts and all five original videos. The footer supports pause, replay and seeking. Interacting with a figure pauses the tour. Video loading pauses its clock, recordings play at their original speed, and switching tabs stops playback. Mobile diagrams have separate vertical layouts.
 
 ## Evidence and interaction
 
@@ -19,4 +21,4 @@ The anonymous website omits author identities and affiliations. Its paper and so
 
 The explanatory interaction was inspired by [Shared Geometry as a Rosetta Stone](https://dominik-schnaus.github.io/unpaired-rosetta/). This site has its own implementation, visual identity and UniGeom data. Manrope is distributed under the SIL Open Font License in `assets/fonts/OFL.txt`.
 
-Keyboard controls include arrow navigation within tab lists, observation browsing on the geometry canvas and target-token selection in the spatial illustration. The page respects reduced-motion preferences. Switching chapters pauses the connection sequence. Videos pause when leaving the viewport or hiding the page.
+Keyboard controls include arrow navigation within tab lists, observation browsing on the geometry canvas and target-token selection in the spatial illustration. The page respects reduced-motion preferences. Switching pages pauses the local connection sequence. Videos pause when leaving the viewport or hiding the page.

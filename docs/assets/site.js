@@ -1,22 +1,7 @@
-import { GeometryView } from "./geometry.js";
-import { initConnection, initInterface } from "./diagrams.js";
+import { GeometryView } from "./geometry.js?v=20261126";
+import { initConnection, initInterface } from "./diagrams.js?v=20261126";
 const $ = (s) => document.querySelector(s);
 
-function activateChapter(name) {
-  document.querySelectorAll("[data-chapter]").forEach((b) => {
-    const active = b.dataset.chapter === name;
-    b.setAttribute("aria-selected", active);
-    b.tabIndex = active ? 0 : -1;
-  });
-  document.querySelectorAll(".chapter").forEach((p) => {
-    p.hidden = p.id !== `panel-${name}`;
-    p.classList.toggle("active", !p.hidden);
-  });
-  document.dispatchEvent(new CustomEvent("chapterchange", { detail: name }));
-}
-document
-  .querySelectorAll("[data-chapter]")
-  .forEach((b) => (b.onclick = () => activateChapter(b.dataset.chapter)));
 function tabKeys(container, selector) {
   container.addEventListener("keydown", (e) => {
     if (
@@ -47,10 +32,10 @@ function tabKeys(container, selector) {
     buttons[j].focus();
   });
 }
-tabKeys($(".chapter-tabs"), "button");
+
 tabKeys($(".experiment-list"), "button");
-initConnection();
-initInterface();
+const connection = initConnection();
+const spatialInterface = initInterface();
 fetch("assets/data/geometry.json")
   .then((r) => {
     if (!r.ok) throw new Error("Geometry data unavailable");
@@ -58,11 +43,13 @@ fetch("assets/data/geometry.json")
   })
   .then((data) => {
     window.geometryView = new GeometryView(data);
+    window.dispatchEvent(new Event("geometryready"));
     document.addEventListener("chapterchange", () =>
       window.geometryView.render(),
     );
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) window.geometryView.startHero();
+      if (!document.hidden && !window.deck?.pausedExplicitly)
+        window.geometryView.startHero();
     });
   })
   .catch(() => {
@@ -159,12 +146,12 @@ function renderResults() {
     div.className = `bar-row ${row.method === s.emphasis ? "emphasis" : ""}`;
     const color =
       row.method === "native"
-        ? "#397f7d"
+        ? "#68c5b4"
         : row.method === "self"
-          ? "#8cafab"
+          ? "#8caea8"
           : row.method === s.emphasis
-            ? "#8080ff"
-            : "#c3bccf";
+            ? "#a29cff"
+            : "#676579";
     div.innerHTML = `<span class="bar-label">${row.label}</span><div class="bar-track"><div class="bar-fill" style="--value:${row[metric]}%;--bar-color:${color}"></div></div><span class="bar-value">${row[metric].toFixed(2)}</span>`;
     root.append(div);
   }
@@ -193,7 +180,7 @@ $("#results-metric").onchange = renderResults;
 const cases = [
   {
     file: "01_navigation",
-    title: "Arrive at the same goal.",
+    title: "Navigation with a frozen LeWM receiver",
     description:
       "A spatial interface replaces ridge while the LeWM receiver and controller stay frozen.",
     metric: "102.0 <span>→</span> 1.3 <small>px</small>",
@@ -229,7 +216,7 @@ const cases = [
   },
   {
     file: "05_recurrent_control",
-    title: "Drive a recurrent world model.",
+    title: "Reacher with a frozen Dreamer receiver",
     description:
       "Mapped LeWM features feed Dreamer’s frozen observation update, recurrent dynamics and actor.",
     metric: "13 <span>→</span> 813",
@@ -237,7 +224,9 @@ const cases = [
     note: "Selected development reset 7006 · seed 0 · native return 982. The paper separately reports 32 fresh-reset confirmation results.",
   },
 ];
+let activeCase = -1;
 function showCase(i) {
+  activeCase = i;
   const c = cases[i],
     v = $("#case-video");
   v.pause();
@@ -284,3 +273,15 @@ $("#copy-citation").onclick = async () => {
       "Citation selected. Press Ctrl+C or ⌘C to copy.";
   }
 };
+
+import { initDeck } from "./deck.js?v=20261126";
+initDeck({
+  connection,
+  spatialInterface,
+  showCase,
+  getActiveCase: () => activeCase,
+  setStudy(name) {
+    $("#results-study").value = name;
+    renderResults();
+  },
+});

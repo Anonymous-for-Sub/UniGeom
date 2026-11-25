@@ -1,7 +1,7 @@
 const svgNS = "http://www.w3.org/2000/svg";
-const P = "#8080ff",
-  D = "#5751b9",
-  T = "#397f7d";
+const P = "#a29cff",
+  D = "#f1eaff",
+  T = "#68c5b4";
 const arrow =
   '<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#aca6c4" stroke-width="1.2"/></marker></defs>';
 const path = (d, active = false, extra = "") =>
@@ -9,7 +9,7 @@ const path = (d, active = false, extra = "") =>
 const text = (x, y, t, cls = "node-small", anchor = "middle") =>
   `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}">${t}</text>`;
 function node(x, y, w, h, label, sub, active = false, color = P) {
-  return `<g><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${active ? color + "15" : "#fbfafc"}" stroke="${active ? color : "#e0dce9"}" stroke-width="${active ? 1.8 : 1}"/>${text(x + w / 2, y + h / 2 - 3, label, "node-title")}${text(x + w / 2, y + h / 2 + 17, sub)}</g>`;
+  return `<g><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${active ? color + "15" : "#191922"}" stroke="${active ? color : "#3a3848"}" stroke-width="${active ? 1.8 : 1}"/>${text(x + w / 2, y + h / 2 - 3, label, "node-title")}${text(x + w / 2, y + h / 2 + 17, sub)}</g>`;
 }
 export function initConnection() {
   let step = 0,
@@ -22,9 +22,10 @@ export function initConnection() {
     "The receiver’s controller selects actions using its existing goal cost. New observations are encoded by A and mapped again.",
   ];
   function render() {
-    document
-      .querySelectorAll("#connection-steps button")
-      .forEach((b, i) => b.classList.toggle("selected", i === step));
+    document.querySelectorAll("#connection-steps button").forEach((b, i) => {
+      b.classList.toggle("selected", i === step);
+      b.setAttribute("aria-pressed", i === step);
+    });
     document.querySelector("#connection-detail").textContent = details[step];
     svg.innerHTML =
       arrow +
@@ -80,7 +81,7 @@ export function initConnection() {
       ) +
       text(354, 278, "Paired target", "node-small") +
       text(332, 68, "Source features", "node-small") +
-      `<g opacity="${step === 1 ? 1 : 0.35}"><circle cx="383" cy="231" r="19" fill="#eeedff" stroke="#b9b2ef"/>${text(383, 236, "ℒ", "node-title")}</g>` +
+      `<g opacity="${step === 1 ? 1 : 0.35}"><circle cx="383" cy="231" r="19" fill="#2b263f" stroke="#a29cff"/>${text(383, 236, "ℒ", "node-title")}</g>` +
       text(424, 38, "T(Eₐ(o)) ≈ Eᵦ(o)", "diagram-label") +
       text(
         426,
@@ -89,7 +90,44 @@ export function initConnection() {
       ) +
       path("M508 132 V307 H550", step >= 2) +
       text(487, 250, "Goal", "node-small");
-    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const compact = matchMedia("(max-width: 800px)").matches;
+    svg.setAttribute("viewBox", compact ? "0 0 360 465" : "0 0 760 460");
+    if (compact) {
+      svg.innerHTML =
+        arrow +
+        text(180, 24, "T(Eₐ(o)) ≈ Eᵦ(o)", "diagram-label") +
+        node(18, 50, 110, 58, "Observation", "RGB history", step === 0) +
+        node(195, 50, 145, 58, "Encoder A", "Frozen", step === 0) +
+        node(18, 153, 110, 58, "Encoder B", "Calibration target", step < 2, T) +
+        node(195, 153, 145, 58, "Interface T", "Trainable", step === 1) +
+        node(195, 260, 145, 58, "Dynamics B", "Frozen", step === 2, T) +
+        node(
+          195,
+          367,
+          145,
+          58,
+          "Controller B",
+          "Existing goal cost",
+          step === 3,
+          T,
+        ) +
+        path("M128 79 H195", step === 0) +
+        path("M73 108 V153", step === 0, 'stroke-dasharray="4 4"') +
+        path("M267 108 V153", step <= 1) +
+        path("M128 182 H195", step === 1, 'stroke-dasharray="4 4"') +
+        text(160, 167, "Target", "node-small") +
+        path("M267 211 V260", step === 2) +
+        path("M267 318 V367", step >= 2) +
+        text(306, 345, "Future", "node-small") +
+        path("M128 289 H195", step === 2) +
+        text(75, 283, "Candidate", "node-small") +
+        text(75, 301, "actions", "node-small") +
+        path("M195 195 H172 V396 H195", step >= 2) +
+        text(151, 350, "Goal", "node-small") +
+        path("M267 425 V449 H7 V79 H18", step === 3) +
+        text(155, 462, "Execute · observe again", "node-small");
+    }
+    if (!compact && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
       const routes = [
         ["M130 198 H148 V131 H174", "M130 222 H148 V326 H174"],
         ["M306 131 H362", "M306 326 H383 V231"],
@@ -107,7 +145,7 @@ export function initConnection() {
     clearInterval(timer);
     timer = null;
     document.querySelector("#play-connection").textContent =
-      "Play the sequence";
+      "Replay these steps";
   }
   document.querySelectorAll("#connection-steps button").forEach(
     (b) =>
@@ -115,6 +153,7 @@ export function initConnection() {
         stop();
         step = +b.dataset.step;
         render();
+        svg.unpauseAnimations?.();
       }),
   );
   document.querySelector("#play-connection").onclick = () => {
@@ -124,6 +163,7 @@ export function initConnection() {
     }
     step = 0;
     render();
+    svg.unpauseAnimations?.();
     document.querySelector("#play-connection").textContent = "Pause sequence";
     timer = setInterval(() => {
       step++;
@@ -140,7 +180,18 @@ export function initConnection() {
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) stop();
   });
+  matchMedia("(max-width: 800px)").addEventListener("change", render);
   render();
+  return {
+    setStep(i) {
+      if (step !== i) {
+        stop();
+        step = i;
+        render();
+      }
+    },
+    stop,
+  };
 }
 
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -163,8 +214,8 @@ function bilinear(x, y) {
 }
 function color(v, teal = false) {
   v = clamp(v);
-  const start = [245, 243, 253],
-    end = teal ? [57, 127, 125] : [128, 128, 255];
+  const start = [32, 30, 46],
+    end = teal ? [104, 197, 180] : [162, 156, 255];
   return `rgb(${start.map((a, i) => Math.round(a + (end[i] - a) * v)).join(",")})`;
 }
 export function initInterface() {
@@ -203,20 +254,28 @@ export function initInterface() {
       0,
     );
     const base = bilinear(sx, sy);
-    document
-      .querySelectorAll("#interface-steps button")
-      .forEach((b, i) => b.classList.toggle("selected", i === stage));
+    document.querySelectorAll("#interface-steps button").forEach((b, i) => {
+      b.classList.toggle("selected", i === stage);
+      b.setAttribute("aria-pressed", i === stage);
+    });
     document.querySelector("#interface-detail").textContent = details[stage];
     document.querySelector("#interface-equation").textContent =
       equations[stage];
     document.querySelector("#head-control").hidden = stage === 0;
+    const compact = matchMedia("(max-width: 800px)").matches;
+    svg.setAttribute("viewBox", compact ? "0 0 360 605" : "0 0 760 480");
     let out =
       arrow +
-      text(191, 60, "Source tokens X", "node-title") +
-      text(191, 82, "16 × 16 · 192 channels") +
       text(
-        573,
-        60,
+        compact ? 180 : 191,
+        compact ? 25 : 60,
+        "Source tokens X",
+        "node-title",
+      ) +
+      text(compact ? 180 : 191, compact ? 45 : 82, "16 × 16 · 192 channels") +
+      text(
+        compact ? 180 : 573,
+        compact ? 334 : 60,
         stage === 3
           ? "Receiver visual tokens"
           : stage === 2
@@ -225,22 +284,22 @@ export function initInterface() {
         "node-title",
       ) +
       text(
-        573,
-        82,
+        compact ? 180 : 573,
+        compact ? 354 : 82,
         stage === 3 ? "14 × 14 · 384 channels" : "14 × 14 · 192 channels",
       );
-    const ax = 55,
-      ay = 110,
-      ac = 17,
-      bx = 454,
-      by = 124,
-      bc = 17;
+    const ax = compact ? 76 : 55,
+      ay = compact ? 60 : 110,
+      ac = compact ? 13 : 17,
+      bx = compact ? 89 : 454,
+      by = compact ? 368 : 124,
+      bc = compact ? 13 : 17;
     for (let y = 0; y < 16; y++)
       for (let x = 0; x < 16; x++) {
         const i = y * 16 + x,
           v =
             stage === 1 ? weights[i] / Math.max(...weights) : sourceValue(x, y);
-        out += `<rect x="${ax + x * ac}" y="${ay + y * ac}" width="15" height="15" rx="2" fill="${color(v)}"/>`;
+        out += `<rect x="${ax + x * ac}" y="${ay + y * ac}" width="${ac - 2}" height="${ac - 2}" rx="2" fill="${color(v)}"/>`;
       }
     for (let y = 0; y < 14; y++)
       for (let x = 0; x < 14; x++) {
@@ -249,15 +308,15 @@ export function initInterface() {
             clamp(((x + 0.5) * 16) / 14 - 0.5, 0, 15),
             clamp(((y + 0.5) * 16) / 14 - 0.5, 0, 15),
           );
-        out += `<rect class="token" data-token="${id}" x="${bx + x * bc}" y="${by + y * bc}" width="15" height="15" rx="2" fill="${color(v + (stage >= 2 ? 0.06 * Math.sin(x + y) : 0), stage === 3)}" stroke="${id === selected ? D : "none"}" stroke-width="3"/>`;
+        out += `<rect class="token" data-token="${id}" x="${bx + x * bc}" y="${by + y * bc}" width="${bc - 2}" height="${bc - 2}" rx="2" fill="${color(v + (stage >= 2 ? 0.06 * Math.sin(x + y) : 0), stage === 3)}" stroke="${id === selected ? D : "none"}" stroke-width="3"/>`;
       }
-    const px = bx + tx * bc + 7.5,
-      py = by + ty * bc + 7.5;
+    const px = bx + tx * bc + (bc - 2) / 2,
+      py = by + ty * bc + (bc - 2) / 2;
     out +=
-      path("M343 237 H434", true) +
+      path(compact ? "M180 291 V309" : "M343 237 H434", true) +
       text(
-        389,
-        214,
+        compact ? 245 : 389,
+        compact ? 305 : 214,
         stage === 0
           ? "Bilinear"
           : stage === 1
@@ -273,16 +332,22 @@ export function initInterface() {
         .sort((a, b) => b.v - a.v)
         .slice(0, 8);
       for (const { v, i } of largest)
-        out += `<path d="M${ax + (i % 16) * ac + 7.5} ${ay + Math.floor(i / 16) * ac + 7.5} Q385 92 ${px} ${py}" fill="none" stroke="${P}" stroke-opacity="${0.1 + (v / Math.max(...weights)) * 0.3}" stroke-width="1"/>`;
+        out += `<path d="M${ax + (i % 16) * ac + (ac - 2) / 2} ${ay + Math.floor(i / 16) * ac + (ac - 2) / 2} Q${compact ? "30 320" : "385 92"} ${px} ${py}" fill="none" stroke="${P}" stroke-opacity="${0.1 + (v / Math.max(...weights)) * 0.3}" stroke-width="1"/>`;
     }
     out +=
       text(
-        192,
-        411,
+        compact ? 180 : 192,
+        compact ? 285 : 411,
         stage === 1
           ? "Normalized attention weights"
           : "Illustrative feature values",
-      ) + text(572, 411, `Selected token (${tx}, ${ty})`, "diagram-label");
+      ) +
+      text(
+        compact ? 180 : 572,
+        compact ? 581 : 411,
+        `Selected token (${tx}, ${ty})`,
+        "diagram-label",
+      );
     const readout =
       stage === 0
         ? `Bilinear value  ${base.toFixed(3)}`
@@ -291,7 +356,12 @@ export function initInterface() {
           : stage === 2
             ? "Stable base + learned spatial correction"
             : "Receiver scale restored before prediction";
-    out += text(380, 455, readout, "diagram-label");
+    out += text(
+      compact ? 180 : 380,
+      compact ? 601 : 455,
+      readout,
+      "diagram-label",
+    );
     svg.innerHTML = out
       .replaceAll('id="arrow"', 'id="interface-arrow"')
       .replaceAll("url(#arrow)", "url(#interface-arrow)");
@@ -324,5 +394,14 @@ export function initInterface() {
       render();
     }
   });
+  matchMedia("(max-width: 800px)").addEventListener("change", render);
   render();
+  return {
+    setStage(i) {
+      if (stage !== i) {
+        stage = i;
+        render();
+      }
+    },
+  };
 }
