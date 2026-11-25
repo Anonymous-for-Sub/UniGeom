@@ -1,3 +1,4 @@
+import { initCalibration } from "./calibration.js?v=20261126e";
 const $ = (s) => document.querySelector(s);
 const descriptions = [
   {
@@ -14,6 +15,7 @@ const descriptions = [
   },
 ];
 export function initPaperViews() {
+  const calibration = initCalibration();
   let figures = [],
     step = 0,
     resultView = "cohorts",
@@ -101,7 +103,16 @@ export function initPaperViews() {
   function setResultView(id) {
     resultView = id;
     $("#results-live").hidden = id !== "cohorts";
-    $("#results-evidence").hidden = id === "cohorts";
+    $("#results-evidence").hidden = id !== "prediction-controls";
+    calibration.setView(id);
+    $("#slide-results .chapter-copy > p").textContent = {
+      cohorts:
+        "Compare complete evaluation cohorts. Every connected route uses the receiver’s existing prediction and control system.",
+      "prediction-controls":
+        "Two independently trained model pairs are connected in both directions. Compare the learned interface with native prediction, linear mapping, state copying and shuffled actions.",
+      "learned-source":
+        "A learned source and correct correspondence make calibration more effective. Explore both factors at the same four trajectory budgets.",
+    }[id];
     document
       .querySelectorAll("[data-results-live]")
       .forEach((e) => (e.hidden = id !== "cohorts"));
