@@ -1,7 +1,7 @@
-import { initApplication } from "./application.js?v=20261126j";
-import { initFramework, frameworkSteps } from "./framework.js?v=20261126j";
-import { GeometryView } from "./geometry.js?v=20261126j";
-import { initInterface } from "./diagrams.js?v=20261126j";
+import { initApplication } from "./application.js?v=20261127m";
+import { initFramework, frameworkSteps } from "./framework.js?v=20261127m";
+import { GeometryView } from "./geometry.js?v=20261127m";
+import { initInterface } from "./diagrams.js?v=20261127m";
 const $ = (s) => document.querySelector(s);
 
 function tabKeys(container, selector) {
@@ -279,8 +279,8 @@ new IntersectionObserver(
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) $("#case-video").pause();
 });
-import { initDeck } from "./deck.js?v=20261126j";
-import { initPaperViews } from "./paper-views.js?v=20261126j";
+import { initDeck } from "./deck.js?v=20261127m";
+import { initPaperViews } from "./paper-views.js?v=20261127m";
 const paperViews = initPaperViews();
 window.paperViews = paperViews;
 const application = initApplication();

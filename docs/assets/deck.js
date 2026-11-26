@@ -72,6 +72,7 @@ export function initDeck(api) {
   const v = $("#case-video");
   const slide = () => $(`#slide-${pages[page].id}`);
   function updateControls() {
+    $("#mobile-chapter").value = pages[page].id;
     $("#autoplay").setAttribute("aria-pressed", String(playing));
     $("#autoplay span").textContent = playing
       ? "Pause"
@@ -282,7 +283,7 @@ export function initDeck(api) {
       const active = b.dataset.page === pages[page].id;
       b.setAttribute("aria-selected", active);
       b.tabIndex = active ? 0 : -1;
-      if (active) b.scrollIntoView({ block: "nearest", inline: "nearest" });
+      if (active && b.getClientRects().length) b.scrollIntoView({ block: "nearest", inline: "nearest" });
     });
     if (historyMode !== "none")
       history[historyMode === "push" ? "pushState" : "replaceState"](
@@ -450,6 +451,9 @@ export function initDeck(api) {
         ) * 7000;
     cue = "";
     updateControls();
+  });
+  $("#mobile-chapter").addEventListener("change", (event) => {
+    go(pages.findIndex((p) => p.id === event.target.value));
   });
   const rail = $(".page-tabs");
   rail.addEventListener("keydown", (e) => {

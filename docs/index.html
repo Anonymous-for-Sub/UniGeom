@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport" />
     <title>UniGeom — Shared Geometry for World Models</title>
     <meta
       content="Connect independently trained perception to frozen world models. Explore shared representation geometry, lightweight interfaces, and recorded prediction and control experiments."
@@ -24,18 +24,30 @@
       property="og:image"
     />
     <link href="assets/favicon.svg" rel="icon" type="image/svg+xml" />
-    <link href="assets/site.css?v=20261126j" rel="stylesheet" />
-    <script src="assets/site.js?v=20261126j" type="module"></script>
+    <link href="assets/site.css?v=20261127m" rel="stylesheet" />
+    <script src="assets/site.js?v=20261127m" type="module"></script>
     <meta content="dark" name="color-scheme" />
-    <link href="assets/framework.css?v=20261126j" rel="stylesheet" />
-    <link href="assets/integrated.css?v=20261126j" rel="stylesheet" />
-    <link href="assets/interface-motion.css?v=20261126j" rel="stylesheet" />
-    <link href="assets/application.css?v=20261126j" rel="stylesheet" />
-    <link href="assets/navigation.css?v=20261126j" rel="stylesheet" />
+    <link href="assets/framework.css?v=20261127m" rel="stylesheet" />
+    <link href="assets/integrated.css?v=20261127m" rel="stylesheet" />
+    <link href="assets/interface-motion.css?v=20261127m" rel="stylesheet" />
+    <link href="assets/application.css?v=20261127m" rel="stylesheet" />
+    <link href="assets/navigation.css?v=20261127m" rel="stylesheet" />
+    <link href="assets/mobile.css?v=20261127m" rel="stylesheet" />
   </head>
   <body>
     <a class="skip" href="#stage">Skip to presentation</a>
     <header class="site-header">
+      <label class="mobile-chapter-picker"><span class="sr-only">Choose a section</span>
+        <select id="mobile-chapter" aria-label="Choose a section">
+          <option value="overview">01 · Overview</option>
+          <option value="geometry">02 · Shared geometry</option>
+          <option value="application">03 · Application</option>
+          <option value="connection">04 · Framework</option>
+          <option value="interface">05 · Interface</option>
+          <option value="experiments">06 · Experiments</option>
+          <option value="results">07 · Results</option>
+        </select>
+      </label>
       <nav aria-label="Presentation pages" class="page-tabs" role="tablist">
         <button
           aria-controls="slide-overview"

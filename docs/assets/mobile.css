@@ -1,0 +1,129 @@
+/* Compact screens use the same tour, with room for touch and readable evidence. */
+.mobile-chapter-picker { display: none; }
+@media (max-width: 800px), (max-width: 1000px) and (max-height: 500px) and (pointer: coarse) {
+  :root {
+    --header: calc(60px + env(safe-area-inset-top, 0px));
+    --footer: calc(72px + env(safe-area-inset-bottom, 0px));
+  }
+  html, body { height: 100%; height: 100dvh; }
+  .deck { height: calc(100dvh - var(--header) - var(--footer)); }
+  .site-header { padding: env(safe-area-inset-top, 0px) 16px 0; gap: 12px; }
+  .site-header .page-tabs { display: none; }
+  .mobile-chapter-picker { display: block; flex: 1; min-width: 0; }
+  #mobile-chapter {
+    width: 100%; height: 44px; padding: 0 12px;
+    font-size: 16px; font-weight: 600; color: var(--ink);
+    background: #201e2b; border-color: #514963; border-radius: 9px;
+  }
+  .header-code { display: flex; align-items: center; justify-content: center; min-width: 48px; min-height: 44px; }
+  .slide { padding: 22px 18px 32px; scroll-padding-block: 16px; }
+  .slide, .chapter-copy, .chapter-stage { min-width: 0; }
+  .chapter:not([hidden]) { display: flex; flex-direction: column; align-items: stretch; gap: 24px; }
+  .chapter-stage { order: -1; width: 100%; flex: none; }
+  .problem-inset { display: block; min-height: 44px; padding: 12px 0; }
+  .problem-inset img { display: none; }
+  .deck-controls { height: var(--footer); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .controls-inner { display: flex; height: 70px; padding: 0 64px; justify-content: center; }
+  .page-position { display: none; }
+  .playback { gap: 8px; }
+  .autoplay { min-width: 96px; min-height: 44px; padding: 8px 10px; }
+  .icon-button { width: auto; min-width: 60px; height: 44px; padding: 8px; font-size: 13px; }
+  .edge-step {
+    top: auto; bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    width: 44px; height: 44px; border-radius: 11px;
+  }
+  #previous-page { left: max(10px, env(safe-area-inset-left, 0px)); }
+  #next-page { right: max(10px, env(safe-area-inset-right, 0px)); }
+  .edge-step svg { width: 16px; height: 24px; }
+  .hero h1 { font-size: clamp(52px, 14vw, 68px); }
+  .hero h2 { font-size: clamp(25px, 6.8vw, 30px); line-height: 1.3; }
+  .hero-visual { height: clamp(310px, 86vw, 380px); min-height: 0; margin-bottom: 16px; }
+  .hero-evidence { font-size: 12px; line-height: 1.6; }
+  .hero .attribution .affiliations, .hero .correspondence { font-size: 12px; }
+  .hero-actions { gap: 10px; }
+  .hero-actions .button { min-height: 44px; }
+  select, .field select { font-size: 16px; min-height: 44px; max-width: 100%; }
+  .stage-steps button, #next-query, .pair-summary { min-height: 44px; }
+  .stage-top { gap: 6px 12px; }
+  .geometry-stage #geometry-cloud { height: clamp(300px, 90vw, 390px); min-height: 0; touch-action: pan-y; }
+  .geometry-stage .stage-steps { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); overflow: visible; }
+  .geometry-stage .stage-steps button { min-width: 0; }
+  .neighbor-strip { overflow-x: auto; padding: 4px 2px 10px; scroll-snap-type: x proximity; }
+  .neighbor-strip button { flex-shrink: 0; scroll-snap-align: start; }
+  .connection-stage { min-height: 0; height: auto; justify-content: flex-start; }
+  .connection-stage #framework-diagram { flex: none; height: 340px; }
+  #connection-steps button, .interface-stage .stage-steps button { min-height: 58px; font-size: 13px; padding: 9px 7px; }
+  .connection-stage, .interface-stage { gap: 12px; }
+  .native-framework-viewport { height: 340px; max-height: none; border: 1px solid var(--line); border-radius: 10px; overscroll-behavior: contain; }
+  .native-framework-viewport .native-framework { width: 800px; min-width: 800px; height: 429px; max-height: none; }
+  .interface-stage .diagram-scroll svg { max-width: 400px; }
+  .equation { overflow-x: auto; font-size: 14px; padding-block: 12px; }
+  /* Stack captions above the scene so neither the robot nor the text is covered. */
+  #slide-application:not([hidden]) { padding: 12px 12px 24px; }
+  #slide-application .application-stage, #application-scene { height: auto; }
+  #application-scene .app-viewport { display: grid; grid-template-rows: auto auto; flex: none; height: auto; }
+  #application-scene .app-caption {
+    grid-row: 1; position: relative; inset: auto; width: 100%; max-width: none;
+    margin: 0; padding: 16px 18px; border: 0; border-radius: 0;
+    background: #211e2c; box-shadow: none; backdrop-filter: none;
+  }
+  #application-scene .app-caption h2 { font-size: 22px; margin-bottom: 8px; }
+  #application-scene .app-caption > p { font-size: 13px; line-height: 1.6; display: block; }
+  #application-scene .app-caption > .footnote { font-size: 11px; margin-top: 8px; }
+  #application-scene .app-caption .app-location { display: flex; font-size: 11px; }
+  #application-scene canvas { position: relative; inset: auto; grid-row: 2; height: clamp(280px, 90vw, 420px); width: 100%; }
+  #application-scene .app-reset { min-height: 44px; padding: 8px 12px; font-size: 12px; bottom: 10px; }
+  #application-scene .app-route { font-size: 11px; gap: 7px; padding: 14px 8px; line-height: 1.5; }
+  /* The plot and its selectors precede the longer protocol explanation. */
+  #slide-results { gap: 14px; }
+  #slide-results .chapter-copy, #slide-results .results-stage { display: contents; }
+  #slide-results .chapter-copy h2 { order: 0; font-size: 26px; margin: 0; }
+  #slide-results .chapter-copy > p:not(#results-context) { order: 1; margin: 0; font-size: 14px; line-height: 1.6; }
+  #slide-results .evidence-steps { order: 2; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; margin: 4px 0; overflow: visible; }
+  #slide-results .evidence-steps button { min-width: 0; min-height: 54px; padding: 8px 5px; font-size: 12px; white-space: normal; }
+  #slide-results .field { order: 3; width: 100%; align-self: stretch; margin: 0; gap: 5px; font-size: 12px; }
+  #slide-results .field select { width: 100%; padding: 8px 10px; }
+  #results-live, #results-evidence, #calibration-evidence { order: 4; margin-top: 8px; }
+  #results-context { order: 5; margin: 8px 0 0; font-size: 13px; }
+  #slide-results .chapter-copy > a { order: 6; min-height: 44px; }
+  #results-live .stage-top { margin-bottom: 8px; }
+  #results-chart { padding: 12px 0 18px; }
+  .bar-row { grid-template-columns: minmax(0,1fr) auto; gap: 5px 12px; margin-bottom: 15px; }
+  .bar-label { grid-column: 1; grid-row: 1; font-size: 13px; }
+  .bar-value { grid-column: 2; grid-row: 1; font-size: 14px; }
+  .bar-track { grid-column: 1 / -1; grid-row: 2; height: 12px; }
+  .bar-scale { margin: 4px 0 0; font-size: 12px; }
+  .result-insight { font-size: 16px; padding-top: 16px; }
+  #results-evidence img { height: auto; max-height: none; }
+  .calibration-grid { grid-template-columns: 1fr; gap: 24px; }
+  .calibration-grid section + section { border-left: 0; border-top: 1px solid var(--line); padding: 22px 0 0; }
+  .calibration-toolbar { gap: 10px; }
+  .budget-options { flex: 1; }
+  .budget-options button { min-height: 44px; flex: 1; padding: 8px; }
+  #budget-original { min-height: 44px; }
+  .calibration-selectors { align-items: stretch; }
+  .calibration-selectors label { flex: 1; min-width: 125px; }
+  .calibration-selectors select { display: block; margin: 5px 0 0; width: 100%; }
+  .experiment-list { scroll-snap-type: x proximity; padding-bottom: 10px; }
+  .experiment-list button { scroll-snap-align: start; min-height: 58px; }
+  #case-video { width: 100%; height: auto; object-fit: contain; aspect-ratio: auto; }
+  #figure-viewer { height: calc(100dvh - 20px); max-height: calc(100dvh - 20px); }
+  .viewer-toolbar .button, .viewer-toolbar button { min-height: 44px; }
+}
+@media (max-width: 800px) and (max-height: 500px) {
+  :root { --header: 52px; --footer: calc(60px + env(safe-area-inset-bottom, 0px)); }
+  .controls-inner { height: 58px; }
+  .edge-step { bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+  #application-scene canvas { height: 320px; }
+}
+
+@media (max-width: 1000px) and (max-height: 500px) and (pointer: coarse) {
+  :root { --header: 52px; --footer: calc(60px + env(safe-area-inset-bottom, 0px)); }
+  .controls-inner { height: 58px; }
+  .edge-step { bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+  #application-scene .app-viewport { grid-template-columns: 250px minmax(0, 1fr); grid-template-rows: auto; }
+  #application-scene .app-caption { grid-column: 1; grid-row: 1; }
+  #application-scene canvas { grid-column: 2; grid-row: 1; height: 300px; }
+  .interface-stage .diagram-scroll svg { max-width: none; }
+  #connection-steps, .interface-stage .stage-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

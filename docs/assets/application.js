@@ -108,8 +108,8 @@ export function initApplication() {
   }
   function resize() {
     if (!renderer || !visible()) return;
-    const w = viewport.clientWidth,
-      h = viewport.clientHeight;
+    const w = canvas.clientWidth,
+      h = canvas.clientHeight;
     const ratio = renderer.pixelRatio(w);
     if (w && h) {
       canvas.width = Math.round(w * ratio);
